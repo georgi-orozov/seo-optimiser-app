@@ -15,7 +15,7 @@ namespace SEOOptimiser.API.Controllers;
 [Route("api/sessions")]
 [Authorize]
 [Produces("application/json")]
-public class SessionsController(IMediator mediator) : ControllerBase
+public partial class SessionsController(IMediator mediator, ILogger<SessionsController> logger) : ControllerBase
 {
     /// <summary>
     /// Creates a new chat session for the authenticated user.
@@ -35,6 +35,7 @@ public class SessionsController(IMediator mediator) : ControllerBase
         [FromBody] CreateSessionRequest req,
         CancellationToken ct)
     {
+        LogCreateSession(logger, User.GetUserId());
         var result = await mediator.Send(
             new CreateSessionCommand(User.GetUserId(), req.Title ?? "New Session"), ct);
         return CreatedAtAction(nameof(GetSession), new { id = result.Id }, result);
@@ -55,6 +56,7 @@ public class SessionsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetSessions(CancellationToken ct)
     {
+        LogGetSessions(logger, User.GetUserId());
         var result = await mediator.Send(new GetSessionsQuery(User.GetUserId()), ct);
         return Ok(result);
     }
@@ -77,6 +79,7 @@ public class SessionsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSession(Guid id, CancellationToken ct)
     {
+        LogGetSession(logger, id, User.GetUserId());
         var result = await mediator.Send(new GetSessionByIdQuery(id, User.GetUserId()), ct);
         return result is null ? NotFound() : Ok(result);
     }
@@ -115,17 +118,22 @@ public class SessionsController(IMediator mediator) : ControllerBase
         [FromBody] SendMessageRequest req,
         CancellationToken ct)
     {
-        try
-        {
-            var result = await mediator.Send(
-                new SendMessageCommand(id, User.GetUserId(), req.Content), ct);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
+        LogSendMessage(logger, id, User.GetUserId());
+        var result = await mediator.Send(new SendMessageCommand(id, User.GetUserId(), req.Content), ct);
+        return Ok(result);
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "CreateSession requested by user {UserId}")]
+    private static partial void LogCreateSession(ILogger logger, string userId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "GetSessions requested by user {UserId}")]
+    private static partial void LogGetSessions(ILogger logger, string userId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "GetSession requested for {SessionId} by user {UserId}")]
+    private static partial void LogGetSession(ILogger logger, Guid sessionId, string userId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "SendMessage requested for session {SessionId} by user {UserId}")]
+    private static partial void LogSendMessage(ILogger logger, Guid sessionId, string userId);
 }
 
 /// <summary>Request body for creating a new session.</summary>

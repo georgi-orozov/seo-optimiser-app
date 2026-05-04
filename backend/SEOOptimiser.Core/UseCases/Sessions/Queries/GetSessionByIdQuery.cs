@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SEOOptimiser.Core.Interfaces;
 
 namespace SEOOptimiser.Core.UseCases.Sessions.Queries;
@@ -42,12 +43,14 @@ public record ChatMessageDto(
     DateTime CreatedAt,
     IReadOnlyList<SuggestionDto>? Suggestions);
 
-public class GetSessionByIdQueryHandler(IAppDbContext db)
+public partial class GetSessionByIdQueryHandler(IAppDbContext db, ILogger<GetSessionByIdQueryHandler> logger)
     : IRequestHandler<GetSessionByIdQuery, SessionDetailDto?>
 {
     public async Task<SessionDetailDto?> Handle(
         GetSessionByIdQuery request, CancellationToken cancellationToken)
     {
+        LogFetchingSession(logger, request.SessionId, request.UserId);
+
         var session = await db.ChatSessions
             .Include(s => s.Messages.OrderBy(m => m.CreatedAt))
                 .ThenInclude(m => m.Suggestions)
@@ -55,7 +58,13 @@ public class GetSessionByIdQueryHandler(IAppDbContext db)
                 s => s.Id == request.SessionId && s.UserId == request.UserId,
                 cancellationToken);
 
-        if (session is null) return null;
+        if (session is null)
+        {
+            LogSessionNotFound(logger, request.SessionId, request.UserId);
+            return null;
+        }
+
+        LogSessionFound(logger, request.SessionId, session.Messages.Count);
 
         return new SessionDetailDto(
             session.Id,
@@ -74,4 +83,16 @@ public class GetSessionByIdQueryHandler(IAppDbContext db)
                         : null))
                 .ToList());
     }
+
+    [LoggerMessage(Level = LogLevel.Debug,
+        Message = "Fetching session {SessionId} for user {UserId}")]
+    private static partial void LogFetchingSession(ILogger logger, Guid sessionId, string userId);
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Session {SessionId} not found for user {UserId}")]
+    private static partial void LogSessionNotFound(ILogger logger, Guid sessionId, string userId);
+
+    [LoggerMessage(Level = LogLevel.Debug,
+        Message = "Session {SessionId} found with {MessageCount} messages")]
+    private static partial void LogSessionFound(ILogger logger, Guid sessionId, int messageCount);
 }

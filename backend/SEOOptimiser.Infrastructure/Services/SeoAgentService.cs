@@ -13,7 +13,7 @@ using AIChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 namespace SEOOptimiser.Infrastructure.Services;
 
-public sealed class SeoAgentService : IAgentService
+public sealed partial class SeoAgentService : IAgentService
 {
     // Intentionally weak SEO so the agent always has meaningful suggestions to make.
     private const string FakePageHtml = """
@@ -88,6 +88,8 @@ public sealed class SeoAgentService : IAgentService
         _currentSuggestions.Value = [];
         try
         {
+            LogCreatingAgentSession(priorMessages.Count);
+
             var agentSession = await _agent.CreateSessionAsync(cancellationToken);
 
             if (priorMessages.Count > 0)
@@ -101,9 +103,14 @@ public sealed class SeoAgentService : IAgentService
                 agentSession.SetInMemoryChatHistory(history);
             }
 
+            LogRunningAgent(userMessage.Length);
+
             var response = await _agent.RunAsync(userMessage, agentSession, options: null, cancellationToken);
             var captured = _currentSuggestions.Value.ToList();
-            return new AgentRunResult(response.Text, captured);
+
+            LogAgentRunComplete(response.Text?.Length ?? 0, captured.Count);
+
+            return new AgentRunResult(response.Text!, captured);
         }
         finally
         {
@@ -117,20 +124,21 @@ public sealed class SeoAgentService : IAgentService
 
         if (_useFakePage)
         {
-            _logger.LogWarning(
-                "PageFetcher:UseFake is enabled — returning fake HTML instead of fetching '{Url}'.",
-                url);
+            LogFakePageWarning(url);
             html = FakePageHtml;
         }
         else
         {
+            LogFetchingPage(url);
             using var client = _httpClientFactory.CreateClient("PageFetcher");
             try
             {
                 html = await client.GetStringAsync(url);
+                LogFetchedPage(url, html.Length);
             }
             catch (Exception ex)
             {
+                LogFetchPageFailed(ex, url);
                 return JsonSerializer.Serialize(new { error = $"Failed to fetch page: {ex.Message}" });
             }
         }
@@ -153,4 +161,29 @@ public sealed class SeoAgentService : IAgentService
         string? GetAttr(string xpath, string attr) =>
             doc.DocumentNode.SelectSingleNode(xpath)?.GetAttributeValue(attr, null);
     }
+
+    [LoggerMessage(Level = LogLevel.Debug,
+        Message = "Creating agent session (prior messages: {Count})")]
+    private partial void LogCreatingAgentSession(int count);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Running agent (message length: {Length} chars)")]
+    private partial void LogRunningAgent(int length);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Agent run complete — response: {ResponseLength} chars, suggestions captured: {SuggestionCount}")]
+    private partial void LogAgentRunComplete(int responseLength, int suggestionCount);
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "PageFetcher:UseFake is enabled — returning fake HTML instead of fetching '{Url}'.")]
+    private partial void LogFakePageWarning(string url);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Fetching page: {Url}")]
+    private partial void LogFetchingPage(string url);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Fetched {Url} ({Length} bytes)")]
+    private partial void LogFetchedPage(string url, int length);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to fetch page: {Url}")]
+    private partial void LogFetchPageFailed(Exception ex, string url);
 }

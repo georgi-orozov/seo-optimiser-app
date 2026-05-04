@@ -5,6 +5,7 @@ import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
+import ErrorBoundary from './components/ErrorBoundary'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import './styles/animations.css'
@@ -16,9 +17,11 @@ createRoot(document.getElementById('root')!).render(
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <MantineProvider>
         <Notifications />
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <ErrorBoundary>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ErrorBoundary>
       </MantineProvider>
     </ClerkProvider>
   </StrictMode>,

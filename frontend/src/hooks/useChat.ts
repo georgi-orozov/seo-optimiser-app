@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { notifications } from '@mantine/notifications'
 import { sendMessage as sendMessageApi } from '@/api/messages'
 import { getSessionById } from '@/api/sessions'
+import { ApiError } from '@/api/client'
 import { useChatStore } from '@/store/chatStore'
 
 export function useChat() {
@@ -18,11 +19,11 @@ export function useChat() {
       try {
         const session = await getSessionById(id)
         setActiveMessages(session.messages)
-      } catch {
+      } catch (err) {
         notifications.show({
           color: 'red',
           title: 'Failed to load session',
-          message: 'Please try again.',
+          message: err instanceof ApiError ? err.message : 'Please try again.',
         })
       }
     },
@@ -45,12 +46,12 @@ export function useChat() {
       try {
         const result = await sendMessageApi(activeSessionId, content)
         appendMessage(result.assistantMessage)
-      } catch {
+      } catch (err) {
         removeMessage(optimisticId)
         notifications.show({
           color: 'red',
           title: 'Failed to send message',
-          message: 'Please try again.',
+          message: err instanceof ApiError ? err.message : 'Please try again.',
         })
       } finally {
         setIsSending(false)

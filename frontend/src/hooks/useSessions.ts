@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { notifications } from '@mantine/notifications'
 import { getSessions, createSession } from '@/api/sessions'
+import { ApiError } from '@/api/client'
 import { useChatStore } from '@/store/chatStore'
 
 export function useSessions() {
@@ -14,9 +15,18 @@ export function useSessions() {
     try {
       const data = await getSessions()
       setSessions(data)
-    } catch {
-      // Silently mark as loaded with empty list — a new user always starts with 0 sessions
+    } catch (err) {
+      // 401 means Clerk hasn't authenticated yet — a fresh user always starts with 0 sessions.
+      if (err instanceof ApiError && err.statusCode === 401) {
+        setSessions([])
+        return
+      }
       setSessions([])
+      notifications.show({
+        color: 'red',
+        title: 'Could not load sessions',
+        message: err instanceof ApiError ? err.message : 'Please refresh the page.',
+      })
     }
   }, [setSessions])
 
@@ -31,11 +41,11 @@ export function useSessions() {
         updatedAt: session.createdAt,
       })
       navigate(`/sessions/${session.id}`)
-    } catch {
+    } catch (err) {
       notifications.show({
         color: 'red',
         title: 'Failed to create session',
-        message: 'Please try again.',
+        message: err instanceof ApiError ? err.message : 'Please try again.',
       })
     } finally {
       setIsLoading(false)
@@ -43,5 +53,4 @@ export function useSessions() {
   }, [addSession, navigate])
 
   return { loadSessions, createNewSession, isLoading }
-
 }

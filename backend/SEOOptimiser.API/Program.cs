@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SEOOptimiser.API.Authentication;
+using SEOOptimiser.API.Middleware;
 using SEOOptimiser.Core.Interfaces;
 using SEOOptimiser.Core.UseCases.Sessions.Commands;
 using SEOOptimiser.Infrastructure.Persistence;
@@ -130,6 +131,8 @@ builder.Services.AddSwaggerGen(opts =>
 
 // ── 8. Controllers + CORS ─────────────────────────────────────────────────────
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddCors(opts =>
     opts.AddDefaultPolicy(policy =>
         policy.WithOrigins(allowedOrigins)
@@ -155,6 +158,7 @@ app.UseSwaggerUI(opts =>
     opts.DefaultModelsExpandDepth(-1); // collapse schema section by default
 });
 
+app.UseExceptionHandler();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

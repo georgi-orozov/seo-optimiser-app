@@ -28,7 +28,8 @@
       "Skill(clerk-react-patterns:*)",
       "Bash(npm create *)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(grep -E \"\\\\.cs$|^d\")"
     ]
   }
 }
