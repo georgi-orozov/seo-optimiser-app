@@ -1,4 +1,4 @@
-import { Card, Badge, Text, Stack, Divider } from '@mantine/core'
+import { Card, Badge, Text, Stack, Divider, Code, Box } from '@mantine/core'
 import type { SuggestionDto } from '@/types/api'
 import SuggestionOption from './SuggestionOption'
 
@@ -13,6 +13,14 @@ const TAG_COLORS: Record<string, string> = {
   h1: 'teal',
 }
 
+function toHtmlSnippet(tag: string, value: string): string {
+  const t = tag.toLowerCase()
+  if (t === 'meta description') {
+    return `<meta name="description" content="${value}" />`
+  }
+  return `<${t}>${value}</${t}>`
+}
+
 export default function SuggestionCard({ tag, suggestions }: Props) {
   const currentValue = suggestions[0]?.currentValue
   const color = TAG_COLORS[tag.toLowerCase()] ?? 'gray'
@@ -25,16 +33,40 @@ export default function SuggestionCard({ tag, suggestions }: Props) {
 
       {currentValue && (
         <>
-          <Text size="xs" c="dimmed" mb="xs">
-            Current: <em>{currentValue}</em>
+          <Text size="xs" c="dimmed" mb={6}>
+            Current:
           </Text>
+          <Box
+            mb="xs"
+            style={{
+              borderRadius: 6,
+              overflow: 'hidden',
+              border: '1px solid var(--mantine-color-gray-2)',
+              background: 'var(--mantine-color-gray-1)',
+            }}
+          >
+            <Code
+              block
+              style={{
+                background: 'transparent',
+                color: 'var(--mantine-color-gray-6)',
+                fontSize: 13,
+                padding: '6px 10px',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+              }}
+            >
+              {toHtmlSnippet(tag, currentValue)}
+            </Code>
+          </Box>
           <Divider mb="xs" />
         </>
       )}
 
-      <Stack gap={4}>
+      <Stack gap="xs">
         {suggestions.map((s, i) => (
-          <SuggestionOption key={i} value={s.suggestedValue} index={i} />
+          <SuggestionOption key={i} tag={tag} value={s.suggestedValue} index={i} />
         ))}
       </Stack>
     </Card>

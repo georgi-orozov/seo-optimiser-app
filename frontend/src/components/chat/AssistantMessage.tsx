@@ -1,4 +1,5 @@
-import { Box, Text, Stack } from '@mantine/core'
+import { Box, Group, Avatar, Text, Stack } from '@mantine/core'
+import { IconRobot } from '@tabler/icons-react'
 import type { ChatMessageDto, SuggestionDto } from '@/types/api'
 import SuggestionCard from '@/components/suggestions/SuggestionCard'
 
@@ -29,32 +30,38 @@ export default function AssistantMessage({ message }: Props) {
 
   return (
     <Box className="message-enter" px="md" py="xs">
-      <Box style={{ maxWidth: '80%' }}>
-        <Box
-          px="md"
-          py="sm"
-          style={{
-            background: 'var(--mantine-color-gray-1)',
-            borderRadius: '18px 18px 18px 4px',
-          }}
-        >
-          <Text size="sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-            {message.content}
+      <Group align="flex-start" gap="xs" wrap="nowrap">
+        <Avatar color="violet" radius="xl" size="sm" style={{ flexShrink: 0, marginTop: 4 }}>
+          <IconRobot size={14} />
+        </Avatar>
+
+        <Box style={{ maxWidth: '80%' }}>
+          <Box
+            px="md"
+            py="sm"
+            style={{
+              background: 'var(--mantine-color-gray-1)',
+              borderRadius: '4px 18px 18px 18px',
+            }}
+          >
+            <Text size="sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {message.content}
+            </Text>
+          </Box>
+
+          {tagGroups && (
+            <Stack gap="xs" mt="sm">
+              {Array.from(tagGroups.entries()).map(([tag, suggestions]) => (
+                <SuggestionCard key={tag} tag={tag} suggestions={suggestions} />
+              ))}
+            </Stack>
+          )}
+
+          <Text size="xs" c="dimmed" mt={4}>
+            {formatTime(message.createdAt)}
           </Text>
         </Box>
-
-        {tagGroups && (
-          <Stack gap="xs" mt="sm">
-            {Array.from(tagGroups.entries()).map(([tag, suggestions]) => (
-              <SuggestionCard key={tag} tag={tag} suggestions={suggestions} />
-            ))}
-          </Stack>
-        )}
-
-        <Text size="xs" c="dimmed" mt={4}>
-          {formatTime(message.createdAt)}
-        </Text>
-      </Box>
+      </Group>
     </Box>
   )
 }

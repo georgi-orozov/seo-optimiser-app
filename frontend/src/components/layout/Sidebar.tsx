@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Button, ScrollArea, Stack, Skeleton, Text } from '@mantine/core'
+import { useEffect, useState } from 'react'
+import { Button, ScrollArea, Stack, Skeleton, Text, Modal, TextInput } from '@mantine/core'
 import { IconPlus } from '@tabler/icons-react'
 import { useChatStore } from '@/store/chatStore'
 import { useSessions } from '@/hooks/useSessions'
@@ -11,9 +11,23 @@ export default function Sidebar() {
   const activeSessionId = useChatStore((s) => s.activeSessionId)
   const { loadSessions, createNewSession, isLoading } = useSessions()
 
+  const [modalOpen, setModalOpen] = useState(false)
+  const [sessionName, setSessionName] = useState('')
+
   useEffect(() => {
     void loadSessions()
   }, [loadSessions])
+
+  function openModal() {
+    setSessionName('')
+    setModalOpen(true)
+  }
+
+  async function handleCreate() {
+    const name = sessionName.trim() || 'New Session'
+    setModalOpen(false)
+    await createNewSession(name)
+  }
 
   return (
     <Stack h="100%" gap={0} p="sm">
@@ -23,7 +37,7 @@ export default function Sidebar() {
         fullWidth
         mb="sm"
         loading={isLoading}
-        onClick={() => void createNewSession()}
+        onClick={openModal}
       >
         New Session
       </Button>
@@ -51,6 +65,26 @@ export default function Sidebar() {
           </Stack>
         )}
       </ScrollArea>
+
+      <Modal
+        opened={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Name your session"
+        size="sm"
+        centered
+      >
+        <TextInput
+          placeholder="e.g. Homepage SEO audit"
+          value={sessionName}
+          onChange={(e) => setSessionName(e.currentTarget.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') void handleCreate() }}
+          data-autofocus
+          mb="md"
+        />
+        <Button fullWidth onClick={() => void handleCreate()} loading={isLoading}>
+          Create Session
+        </Button>
+      </Modal>
     </Stack>
   )
 }

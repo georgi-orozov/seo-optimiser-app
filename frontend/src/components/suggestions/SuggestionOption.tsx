@@ -1,66 +1,77 @@
-import { Group, Text, ActionIcon, Box } from '@mantine/core'
+import { Group, Text, ActionIcon, Box, Code } from '@mantine/core'
 import { IconCopy, IconCheck } from '@tabler/icons-react'
 import { useState } from 'react'
 
 interface Props {
+  tag: string
   value: string
   index: number
 }
 
-export default function SuggestionOption({ value, index }: Props) {
+function toHtmlSnippet(tag: string, value: string): string {
+  const t = tag.toLowerCase()
+  if (t === 'meta description') {
+    return `<meta name="description" content="${value}" />`
+  }
+  return `<${t}>${value}</${t}>`
+}
+
+export default function SuggestionOption({ tag, value, index }: Props) {
   const [copied, setCopied] = useState(false)
+  const snippet = toHtmlSnippet(tag, value)
 
   function handleCopy() {
-    void navigator.clipboard.writeText(value).then(() => {
+    void navigator.clipboard.writeText(snippet).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     })
   }
 
   return (
-    <Group
-      gap="sm"
-      px="sm"
-      py="xs"
+    <Box
       style={{
-        borderRadius: 6,
-        cursor: 'default',
-        transition: 'background 0.15s',
-      }}
-      styles={{
-        root: {
-          '&:hover': { background: 'var(--mantine-color-gray-0)' },
-        },
+        borderRadius: 8,
+        border: '1px solid var(--mantine-color-gray-2)',
+        overflow: 'hidden',
       }}
     >
-      <Box
-        w={22}
-        h={22}
-        style={{
-          borderRadius: '50%',
-          background: 'var(--mantine-color-blue-1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
+      <Group
+        justify="space-between"
+        align="center"
+        px="sm"
+        py={6}
+        style={{ background: 'var(--mantine-color-gray-0)', borderBottom: '1px solid var(--mantine-color-gray-2)' }}
       >
-        <Text size="xs" fw={600} c="blue">
-          {index + 1}
+        <Text size="xs" fw={600} c="dimmed">
+          Option {index + 1}
         </Text>
+        <ActionIcon
+          variant="subtle"
+          size="sm"
+          color={copied ? 'green' : 'gray'}
+          onClick={handleCopy}
+          title="Copy snippet"
+        >
+          {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+        </ActionIcon>
+      </Group>
+
+      <Box px="sm" py="xs" style={{ background: 'var(--mantine-color-gray-1)' }}>
+        <Code
+          block
+          style={{
+            background: 'transparent',
+            color: 'var(--mantine-color-gray-8)',
+            fontSize: 14,
+            padding: 0,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+          }}
+        >
+          {snippet}
+        </Code>
       </Box>
-      <Text size="sm" flex={1} style={{ wordBreak: 'break-word' }}>
-        {value}
-      </Text>
-      <ActionIcon
-        variant="subtle"
-        size="sm"
-        color={copied ? 'green' : 'gray'}
-        onClick={handleCopy}
-        title="Copy to clipboard"
-      >
-        {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
-      </ActionIcon>
-    </Group>
+    </Box>
   )
 }

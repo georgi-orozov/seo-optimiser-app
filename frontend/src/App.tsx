@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@clerk/react'
 import { setTokenGetter } from '@/api/client'
@@ -8,10 +7,9 @@ import ChatPage from '@/pages/ChatPage'
 
 export default function App() {
   const { getToken } = useAuth()
-
-  useEffect(() => {
-    setTokenGetter(getToken)
-  }, [getToken])
+  // Call synchronously so the token getter is registered before any child
+  // component effects fire their API requests (child effects run before parent effects).
+  setTokenGetter(getToken)
 
   return (
     <Routes>

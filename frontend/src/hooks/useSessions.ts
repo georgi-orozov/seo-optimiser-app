@@ -15,18 +15,15 @@ export function useSessions() {
       const data = await getSessions()
       setSessions(data)
     } catch {
-      notifications.show({
-        color: 'red',
-        title: 'Failed to load sessions',
-        message: 'Please refresh the page.',
-      })
+      // Silently mark as loaded with empty list — a new user always starts with 0 sessions
+      setSessions([])
     }
   }, [setSessions])
 
-  const createNewSession = useCallback(async () => {
+  const createNewSession = useCallback(async (title: string) => {
     setIsLoading(true)
     try {
-      const session = await createSession('New Session')
+      const session = await createSession(title)
       addSession({
         id: session.id,
         title: session.title,
@@ -46,4 +43,5 @@ export function useSessions() {
   }, [addSession, navigate])
 
   return { loadSessions, createNewSession, isLoading }
+
 }

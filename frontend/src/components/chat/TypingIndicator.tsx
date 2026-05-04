@@ -1,23 +1,18 @@
-import { Group, Box } from '@mantine/core'
+import { Group, Box, Avatar } from '@mantine/core'
+import { IconRobot } from '@tabler/icons-react'
 
 export default function TypingIndicator() {
   return (
-    <Group gap={4} px="md" py="xs" align="flex-end">
-      <Box
-        w={32}
-        h={32}
-        style={{
-          borderRadius: '50%',
-          background: 'var(--mantine-color-gray-2)',
-          flexShrink: 0,
-        }}
-      />
+    <Group px="md" py="xs" align="flex-start" gap="xs" wrap="nowrap">
+      <Avatar color="violet" radius="xl" size="sm" style={{ flexShrink: 0, marginTop: 4 }}>
+        <IconRobot size={14} />
+      </Avatar>
       <Box
         px="md"
         py="sm"
         style={{
           background: 'var(--mantine-color-gray-1)',
-          borderRadius: '18px 18px 18px 4px',
+          borderRadius: '4px 18px 18px 18px',
           display: 'flex',
           gap: 4,
           alignItems: 'center',
