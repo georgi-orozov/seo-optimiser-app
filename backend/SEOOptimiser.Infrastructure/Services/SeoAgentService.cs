@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Net.Http;
 using System.Text.Json;
 using Anthropic;
 using HtmlAgilityPack;
@@ -36,6 +35,10 @@ public sealed class SeoAgentService : IAgentService
         </html>
         """;
 
+    // Per-async-flow capture of suggestions recorded by the agent via the record_seo_suggestion tool.
+    // AsyncLocal ensures concurrent requests don't interfere with each other.
+    private static readonly AsyncLocal<List<SuggestionCapture>?> _currentSuggestions = new();
+
     private readonly ChatClientAgent _agent;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly bool _useFakePage;
@@ -57,35 +60,55 @@ public sealed class SeoAgentService : IAgentService
             name: "fetch_page",
             description: "Fetches a web page at the given URL and extracts key SEO tags: title, meta description, h1, og:title, og:description, and canonical URL.");
 
+        var suggestTool = AIFunctionFactory.Create(
+            ([Description("The HTML tag being suggested, e.g. 'title', 'meta description', 'h1'.")] string tag,
+             [Description("The page's existing value for this tag. Omit if the tag is absent.")] string? currentValue,
+             [Description("Your recommended replacement value.")] string suggestedValue) =>
+            {
+                _currentSuggestions.Value?.Add(new SuggestionCapture(tag, currentValue, suggestedValue));
+                return Task.FromResult("Suggestion recorded.");
+            },
+            name: "record_seo_suggestion",
+            description: "Record one SEO suggestion. Call once per tag per suggestion round.");
+
         var anthropicClient = new AnthropicClient { ApiKey = anthropicApiKey };
 
         _agent = anthropicClient.AsAIAgent(
             model: "claude-sonnet-4-5",
             instructions: AgentSystemPrompt.Text,
             name: "SeoAgent",
-            tools: [fetchTool]);
+            tools: [fetchTool, suggestTool]);
     }
 
-    public async Task<string> RunAsync(
+    public async Task<AgentRunResult> RunAsync(
         IReadOnlyList<CoreChatMessage> priorMessages,
         string userMessage,
         CancellationToken cancellationToken = default)
     {
-        var agentSession = await _agent.CreateSessionAsync(cancellationToken);
-
-        if (priorMessages.Count > 0)
+        _currentSuggestions.Value = [];
+        try
         {
-            var history = priorMessages
-                .Select(m => new AIChatMessage(
-                    m.Role == MessageRole.User ? ChatRole.User : ChatRole.Assistant,
-                    m.Content))
-                .ToList();
+            var agentSession = await _agent.CreateSessionAsync(cancellationToken);
 
-            agentSession.SetInMemoryChatHistory(history);
+            if (priorMessages.Count > 0)
+            {
+                var history = priorMessages
+                    .Select(m => new AIChatMessage(
+                        m.Role == MessageRole.User ? ChatRole.User : ChatRole.Assistant,
+                        m.Content))
+                    .ToList();
+
+                agentSession.SetInMemoryChatHistory(history);
+            }
+
+            var response = await _agent.RunAsync(userMessage, agentSession, options: null, cancellationToken);
+            var captured = _currentSuggestions.Value.ToList();
+            return new AgentRunResult(response.Text, captured);
         }
-
-        var response = await _agent.RunAsync(userMessage, agentSession, options: null, cancellationToken);
-        return response.Text;
+        finally
+        {
+            _currentSuggestions.Value = null;
+        }
     }
 
     private async Task<string> FetchPageAsync(string url)

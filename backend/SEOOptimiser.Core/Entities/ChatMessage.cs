@@ -12,6 +12,9 @@ public class ChatMessage
 
     public ChatSession Session { get; private set; } = default!;
 
+    private readonly List<Suggestion> _suggestions = [];
+    public IReadOnlyCollection<Suggestion> Suggestions => _suggestions.AsReadOnly();
+
     private ChatMessage() { }
 
     public static ChatMessage Create(Guid sessionId, MessageRole role, string content) =>

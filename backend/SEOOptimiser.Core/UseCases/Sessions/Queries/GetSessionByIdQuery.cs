@@ -17,17 +17,30 @@ public record SessionDetailDto(
     DateTime CreatedAt,
     IReadOnlyList<ChatMessageDto> Messages);
 
+/// <summary>A single structured SEO suggestion attached to an assistant message.</summary>
+/// <param name="Tag">The HTML tag being suggested (e.g. "title", "meta description", "h1").</param>
+/// <param name="CurrentValue">The page's existing value for this tag, or null if absent.</param>
+/// <param name="SuggestedValue">The agent's recommended replacement value.</param>
+public record SuggestionDto(string Tag, string? CurrentValue, string SuggestedValue);
+
 /// <summary>A single message within a chat session.</summary>
 /// <param name="Id">Unique message identifier.</param>
 /// <param name="Role">
 /// Message author: <c>"User"</c> for user messages, <c>"Assistant"</c> for agent replies.
 /// </param>
-/// <param name="Content">
-/// Raw message text. Assistant messages may embed suggestion JSON objects inline,
-/// one per line: <c>{"tag":"...","currentValue":"...","suggestedValue":"..."}</c>
-/// </param>
+/// <param name="Content">The message text.</param>
 /// <param name="CreatedAt">UTC timestamp when the message was persisted.</param>
-public record ChatMessageDto(Guid Id, string Role, string Content, DateTime CreatedAt);
+/// <param name="Suggestions">
+/// Structured SEO suggestions captured during this turn via the <c>record_seo_suggestion</c> tool.
+/// Non-null only on assistant messages that produced suggestions; null on user messages and
+/// assistant messages with no suggestions.
+/// </param>
+public record ChatMessageDto(
+    Guid Id,
+    string Role,
+    string Content,
+    DateTime CreatedAt,
+    IReadOnlyList<SuggestionDto>? Suggestions);
 
 public class GetSessionByIdQueryHandler(IAppDbContext db)
     : IRequestHandler<GetSessionByIdQuery, SessionDetailDto?>
@@ -37,6 +50,7 @@ public class GetSessionByIdQueryHandler(IAppDbContext db)
     {
         var session = await db.ChatSessions
             .Include(s => s.Messages.OrderBy(m => m.CreatedAt))
+                .ThenInclude(m => m.Suggestions)
             .FirstOrDefaultAsync(
                 s => s.Id == request.SessionId && s.UserId == request.UserId,
                 cancellationToken);
@@ -48,7 +62,16 @@ public class GetSessionByIdQueryHandler(IAppDbContext db)
             session.Title,
             session.CreatedAt,
             session.Messages
-                .Select(m => new ChatMessageDto(m.Id, m.Role.ToString(), m.Content, m.CreatedAt))
+                .Select(m => new ChatMessageDto(
+                    m.Id,
+                    m.Role.ToString(),
+                    m.Content,
+                    m.CreatedAt,
+                    m.Suggestions.Count > 0
+                        ? m.Suggestions
+                            .Select(s => new SuggestionDto(s.Tag, s.CurrentValue, s.SuggestedValue))
+                            .ToList()
+                        : null))
                 .ToList());
     }
 }

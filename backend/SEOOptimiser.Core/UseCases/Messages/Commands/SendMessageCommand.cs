@@ -9,9 +9,10 @@ namespace SEOOptimiser.Core.UseCases.Messages.Commands;
 public record SendMessageCommand(Guid SessionId, string UserId, string Content)
     : IRequest<SendMessageResult>;
 
-/// <summary>Result of sending a message — contains only the agent's reply.</summary>
+/// <summary>Result of sending a message — contains the agent's reply with any structured suggestions.</summary>
 /// <param name="AssistantMessage">
-/// The assistant's reply. May contain inline suggestion JSON objects, one per line.
+/// The assistant's reply. Includes a <c>Suggestions</c> list when the agent recorded SEO suggestions
+/// during this turn; null otherwise.
 /// </param>
 public record SendMessageResult(ChatMessageDto AssistantMessage);
 
@@ -32,18 +33,25 @@ public class SendMessageCommandHandler(IAppDbContext db, IAgentService agentServ
         db.ChatMessages.Add(userMsg);
 
         var priorMessages = session.Messages.ToList();
-        var replyText = await agentService.RunAsync(
+        var agentResult = await agentService.RunAsync(
             priorMessages,
             request.Content,
             cancellationToken);
 
-        var assistantMsg = ChatMessage.Create(session.Id, MessageRole.Assistant, replyText);
+        var assistantMsg = ChatMessage.Create(session.Id, MessageRole.Assistant, agentResult.Text);
         db.ChatMessages.Add(assistantMsg);
+
+        foreach (var s in agentResult.Suggestions)
+            db.Suggestions.Add(Suggestion.Create(assistantMsg.Id, s.Tag, s.CurrentValue, s.SuggestedValue));
 
         session.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
+        var suggestionDtos = agentResult.Suggestions
+            .Select(s => new SuggestionDto(s.Tag, s.CurrentValue, s.SuggestedValue))
+            .ToList();
+
         return new SendMessageResult(
-            new ChatMessageDto(assistantMsg.Id, "Assistant", replyText, assistantMsg.CreatedAt));
+            new ChatMessageDto(assistantMsg.Id, "Assistant", agentResult.Text, assistantMsg.CreatedAt, suggestionDtos));
     }
 }

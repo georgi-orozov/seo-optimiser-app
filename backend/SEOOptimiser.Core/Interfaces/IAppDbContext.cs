@@ -7,5 +7,6 @@ public interface IAppDbContext
 {
     DbSet<ChatSession> ChatSessions { get; }
     DbSet<ChatMessage> ChatMessages { get; }
+    DbSet<Suggestion> Suggestions { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

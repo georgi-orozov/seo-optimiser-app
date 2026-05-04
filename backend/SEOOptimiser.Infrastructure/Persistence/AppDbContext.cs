@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<Suggestion> Suggestions => Set<Suggestion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
