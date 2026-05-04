@@ -1,0 +1,96 @@
+using System.ComponentModel;
+using System.Net.Http;
+using System.Text.Json;
+using Anthropic;
+using HtmlAgilityPack;
+using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
+using SEOOptimiser.Core.Constants;
+using SEOOptimiser.Core.Entities;
+using SEOOptimiser.Core.Interfaces;
+using CoreChatMessage = SEOOptimiser.Core.Entities.ChatMessage;
+using AIChatMessage = Microsoft.Extensions.AI.ChatMessage;
+
+namespace SEOOptimiser.Infrastructure.Services;
+
+public sealed class SeoAgentService : IAgentService
+{
+    private readonly ChatClientAgent _agent;
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public SeoAgentService(IHttpClientFactory httpClientFactory, ILogger<SeoAgentService> logger, string anthropicApiKey)
+    {
+        _httpClientFactory = httpClientFactory;
+
+        var fetchTool = AIFunctionFactory.Create(
+            ([Description("The URL of the web page to fetch and analyse.")] string url) =>
+                FetchPageAsync(url),
+            name: "fetch_page",
+            description: "Fetches a web page at the given URL and extracts key SEO tags: title, meta description, h1, og:title, og:description, and canonical URL.");
+
+        var anthropicClient = new AnthropicClient { ApiKey = anthropicApiKey };
+
+        _agent = anthropicClient.AsAIAgent(
+            model: "claude-sonnet-4-20250514",
+            instructions: AgentSystemPrompt.Text,
+            name: "SeoAgent",
+            tools: [fetchTool]);
+    }
+
+    public async Task<string> RunAsync(
+        string sessionId,
+        IReadOnlyList<CoreChatMessage> priorMessages,
+        string userMessage,
+        CancellationToken cancellationToken = default)
+    {
+        var agentSession = await _agent.CreateSessionAsync(sessionId, cancellationToken);
+
+        if (priorMessages.Count > 0)
+        {
+            var history = priorMessages
+                .Select(m => new AIChatMessage(
+                    m.Role == MessageRole.User ? ChatRole.User : ChatRole.Assistant,
+                    m.Content))
+                .ToList();
+
+            agentSession.SetInMemoryChatHistory(history);
+        }
+
+        var response = await _agent.RunAsync(userMessage, agentSession, options: null, cancellationToken);
+        return response.Text;
+    }
+
+    private async Task<string> FetchPageAsync(string url)
+    {
+        using var client = _httpClientFactory.CreateClient("PageFetcher");
+        string html;
+
+        try
+        {
+            html = await client.GetStringAsync(url);
+        }
+        catch (Exception ex)
+        {
+            return JsonSerializer.Serialize(new { error = $"Failed to fetch page: {ex.Message}" });
+        }
+
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        string? GetAttr(string xpath, string attr) =>
+            doc.DocumentNode.SelectSingleNode(xpath)?.GetAttributeValue(attr, null);
+
+        var result = new
+        {
+            title = doc.DocumentNode.SelectSingleNode("//title")?.InnerText.Trim(),
+            metaDescription = GetAttr("//meta[@name='description']", "content"),
+            h1 = doc.DocumentNode.SelectSingleNode("//h1")?.InnerText.Trim(),
+            ogTitle = GetAttr("//meta[@property='og:title']", "content"),
+            ogDescription = GetAttr("//meta[@property='og:description']", "content"),
+            canonical = GetAttr("//link[@rel='canonical']", "href")
+        };
+
+        return JsonSerializer.Serialize(result);
+    }
+}

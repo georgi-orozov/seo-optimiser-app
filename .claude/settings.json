@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "WebSearch",
+      "Bash(dotnet --version)",
+      "Bash(dotnet nuget *)",
+      "Read(//Users/orozovgeorgi/.nuget/packages/microsoft.agents.ai/1.1.0/lib/net10.0/**)",
+      "Read(//Users/orozovgeorgi/.nuget/packages/microsoft.agents.ai.abstractions/1.1.0/lib/net10.0/**)",
+      "Read(//Users/orozovgeorgi/.nuget/packages/microsoft.extensions.ai.abstractions/10.4.0/lib/net10.0/**)",
+      "Read(//Users/orozovgeorgi/.nuget/packages/microsoft.extensions.ai/10.4.0/lib/net10.0/**)",
+      "Read(//Users/orozovgeorgi/.nuget/packages/openai/2.9.1/lib/net10.0/**)",
+      "Read(//Users/orozovgeorgi/.nuget/packages/**)",
+      "Read(//Users/orozovgeorgi/.nuget/packages/anglesharp/**)",
+      "Bash(dotnet new *)",
+      "Bash(dotnet sln *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet tool *)",
+      "Bash(ilspycmd ~/.nuget/packages/microsoft.agents.ai.anthropic/1.3.0-preview.260423.1/lib/net10.0/Microsoft.Agents.AI.Anthropic.dll)",
+      "Bash(ilspycmd ~/.nuget/packages/microsoft.agents.ai/1.3.0/lib/net10.0/Microsoft.Agents.AI.dll)",
+      "Bash(export PATH=\"$PATH:/Users/orozovgeorgi/.dotnet/tools\")",
+      "Bash(ilspycmd ~/.nuget/packages/microsoft.agents.ai.abstractions/1.3.0/lib/net10.0/Microsoft.Agents.AI.Abstractions.dll)",
+      "Bash(ilspycmd ~/.nuget/packages/anthropic/12.13.0/lib/net8.0/Anthropic.dll)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet ef *)"
+    ]
+  }
+}

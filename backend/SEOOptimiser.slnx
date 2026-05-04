@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SEOOptimiser.API/SEOOptimiser.API.csproj" />
+  <Project Path="SEOOptimiser.Core/SEOOptimiser.Core.csproj" />
+  <Project Path="SEOOptimiser.Infrastructure/SEOOptimiser.Infrastructure.csproj" />
+</Solution>
