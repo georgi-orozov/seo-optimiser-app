@@ -62,7 +62,7 @@ dotnet run --project SEOOptimiser.API
 docker compose up --build
 ```
 
-- Swagger UI: `http://localhost:5000/swagger` (dotnet run) or `http://localhost:8080/swagger` (Docker)
+- Swagger UI: `http://localhost:5273/swagger` (dotnet run, HTTP) or `https://localhost:7271/swagger` (dotnet run, HTTPS) or `http://localhost:8080/swagger` (Docker)
 - Auto-migration runs on every startup — no manual `dotnet ef database update` needed in normal use
 
 ### Commands
@@ -135,13 +135,13 @@ changes must be made there.
 - **UI Library**: Mantine v7
 - **Auth**: Clerk (prebuilt components: `<SignIn />`, `<SignUp />`, `<UserButton />`)
 - **HTTP**: Axios with Clerk JWT injected via interceptor
-- **State**: React Context + `useState`/`useEffect` (no heavy state manager needed)
+- **State**: Zustand (`useChatStore` in `src/store/chatStore.ts`)
 - **Routing**: React Router v6
 
 ### Frontend Conventions
 
 - All API calls go through `src/api/` — never inline `fetch`/`axios` in components
-- Clerk `useAuth().getToken()` must be called inside the Axios interceptor to attach Bearer token
+- Clerk JWT is attached via a token getter registry in `src/api/client.ts` — `setTokenGetter` is called once from `App.tsx` after Clerk loads; the Axios interceptor calls it on every request
 - Mantine `notifications` for all error/success feedback
 - `SuggestionCard` renders the structured JSON suggestions in a readable card format — do not dump raw JSON
 - TypeScript strict mode enabled — no `any`
