@@ -16,12 +16,40 @@ namespace SEOOptimiser.Infrastructure.Services;
 
 public sealed class SeoAgentService : IAgentService
 {
+    // Intentionally weak SEO so the agent always has meaningful suggestions to make.
+    private const string FakePageHtml = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Home - Acme Corp</title>
+            <meta name="description" content="We sell things online.">
+            <link rel="canonical" href="https://www.acmecorp.example.com/">
+        </head>
+        <body>
+            <h1>Welcome</h1>
+            <p>Acme Corp is a leading provider of innovative solutions for businesses worldwide.
+            Our products help companies streamline operations and improve productivity.</p>
+            <h2>Our Products</h2>
+            <p>We offer a wide range of products including widgets, gadgets, and more.</p>
+        </body>
+        </html>
+        """;
+
     private readonly ChatClientAgent _agent;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly bool _useFakePage;
+    private readonly ILogger<SeoAgentService> _logger;
 
-    public SeoAgentService(IHttpClientFactory httpClientFactory, ILogger<SeoAgentService> logger, string anthropicApiKey)
+    public SeoAgentService(
+        IHttpClientFactory httpClientFactory,
+        ILogger<SeoAgentService> logger,
+        string anthropicApiKey,
+        bool useFakePage = false)
     {
         _httpClientFactory = httpClientFactory;
+        _logger = logger;
+        _useFakePage = useFakePage;
 
         var fetchTool = AIFunctionFactory.Create(
             ([Description("The URL of the web page to fetch and analyse.")] string url) =>
@@ -32,19 +60,18 @@ public sealed class SeoAgentService : IAgentService
         var anthropicClient = new AnthropicClient { ApiKey = anthropicApiKey };
 
         _agent = anthropicClient.AsAIAgent(
-            model: "claude-sonnet-4-20250514",
+            model: "claude-sonnet-4-5",
             instructions: AgentSystemPrompt.Text,
             name: "SeoAgent",
             tools: [fetchTool]);
     }
 
     public async Task<string> RunAsync(
-        string sessionId,
         IReadOnlyList<CoreChatMessage> priorMessages,
         string userMessage,
         CancellationToken cancellationToken = default)
     {
-        var agentSession = await _agent.CreateSessionAsync(sessionId, cancellationToken);
+        var agentSession = await _agent.CreateSessionAsync(cancellationToken);
 
         if (priorMessages.Count > 0)
         {
@@ -63,23 +90,30 @@ public sealed class SeoAgentService : IAgentService
 
     private async Task<string> FetchPageAsync(string url)
     {
-        using var client = _httpClientFactory.CreateClient("PageFetcher");
         string html;
 
-        try
+        if (_useFakePage)
         {
-            html = await client.GetStringAsync(url);
+            _logger.LogWarning(
+                "PageFetcher:UseFake is enabled — returning fake HTML instead of fetching '{Url}'.",
+                url);
+            html = FakePageHtml;
         }
-        catch (Exception ex)
+        else
         {
-            return JsonSerializer.Serialize(new { error = $"Failed to fetch page: {ex.Message}" });
+            using var client = _httpClientFactory.CreateClient("PageFetcher");
+            try
+            {
+                html = await client.GetStringAsync(url);
+            }
+            catch (Exception ex)
+            {
+                return JsonSerializer.Serialize(new { error = $"Failed to fetch page: {ex.Message}" });
+            }
         }
 
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
-
-        string? GetAttr(string xpath, string attr) =>
-            doc.DocumentNode.SelectSingleNode(xpath)?.GetAttributeValue(attr, null);
 
         var result = new
         {
@@ -92,5 +126,8 @@ public sealed class SeoAgentService : IAgentService
         };
 
         return JsonSerializer.Serialize(result);
+
+        string? GetAttr(string xpath, string attr) =>
+            doc.DocumentNode.SelectSingleNode(xpath)?.GetAttributeValue(attr, null);
     }
 }

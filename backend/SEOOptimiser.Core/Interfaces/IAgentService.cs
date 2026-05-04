@@ -9,7 +9,6 @@ public interface IAgentService
     /// so the agent maintains context. Returns the agent's text reply.
     /// </summary>
     Task<string> RunAsync(
-        string sessionId,
         IReadOnlyList<ChatMessage> priorMessages,
         string userMessage,
         CancellationToken cancellationToken = default);

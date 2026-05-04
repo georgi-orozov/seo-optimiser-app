@@ -16,6 +16,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var anthropicApiKey = builder.Configuration["Anthropic:ApiKey"]
     ?? throw new InvalidOperationException("Anthropic:ApiKey not configured.");
 var authBypass = builder.Configuration.GetValue<bool>("Auth:Bypass");
+var useFakePage = builder.Configuration.GetValue<bool>("PageFetcher:UseFake");
 var clerkAuthority = authBypass
     ? null
     : builder.Configuration["Clerk:Authority"]
@@ -40,7 +41,8 @@ builder.Services.AddSingleton<IAgentService>(sp =>
     new SeoAgentService(
         sp.GetRequiredService<IHttpClientFactory>(),
         sp.GetRequiredService<ILogger<SeoAgentService>>(),
-        anthropicApiKey));
+        anthropicApiKey,
+        useFakePage));
 
 // ── 5. MediatR ────────────────────────────────────────────────────────────────
 builder.Services.AddMediatR(cfg =>

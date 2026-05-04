@@ -35,7 +35,7 @@ seo-optimiser-app/
 - **Database**: PostgreSQL 17 via Entity Framework Core 10 (Npgsql provider)
 - **Mediator**: MediatR 13 (CQRS pattern — Commands + Queries)
 - **Auth**: Clerk JWT validation (`Microsoft.AspNetCore.Authentication.JwtBearer`)
-- **AI Agent**: Microsoft Agent Framework (`Microsoft.Agents.AI.Anthropic` 1.3.0-preview) with `claude-sonnet-4-20250514`
+- **AI Agent**: Microsoft Agent Framework (`Microsoft.Agents.AI.Anthropic` 1.3.0-preview) with `claude-sonnet-4-5`
 - **Page fetching**: Named `HttpClient` ("PageFetcher") + `HtmlAgilityPack` for HTML parsing
 - **API docs**: Swashbuckle (`/swagger`)
 - **Migrations**: EF Core code-first (`SEOOptimiser.Infrastructure`)

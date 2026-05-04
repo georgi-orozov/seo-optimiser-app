@@ -33,7 +33,6 @@ public class SendMessageCommandHandler(IAppDbContext db, IAgentService agentServ
 
         var priorMessages = session.Messages.ToList();
         var replyText = await agentService.RunAsync(
-            session.Id.ToString(),
             priorMessages,
             request.Content,
             cancellationToken);
