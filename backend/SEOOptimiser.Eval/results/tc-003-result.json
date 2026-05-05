@@ -1,0 +1,73 @@
+{
+  "testCaseId": "tc-003",
+  "description": "TOO_SHORT scenario for a freelance web design portfolio with title under 30 characters.",
+  "targetKeywords": [
+    "web design services",
+    "responsive website design",
+    "freelance web developer"
+  ],
+  "agentOutput": {
+    "text": "I\u0027ll analyse that page for you. Let me fetch the current HTML tags first.\nPerfect! I\u0027ve retrieved the page\u0027s current tags. Now let me create 9 optimized suggestions (3 for each of title, meta description, and h1) based on your target keywords: \u0022web design services,\u0022 \u0022responsive website design,\u0022 and \u0022freelance web developer.\u0022\n## Analysis Summary\n\n**Current Issues:**\n\nYour existing title tag \u0022Web Design\u0022 is far too short (just 10 characters) and generic. It\u0027s missing all three of your target keywords and provides no competitive advantage in search results. The current H1 is good quality but doesn\u0027t include any of your primary keywords\u2014it focuses on \u0022custom\u0022 and \u0022small businesses\u0022 rather than \u0022responsive,\u0022 \u0022services,\u0022 or \u0022freelance.\u0022\n\n**Key Improvements:**\n\n**Title Tags:** All three suggestions expand the ultra-short current title to include your primary keywords while staying within the optimal 50-60 character range. Each version front-loads different keyword combinations to test what resonates best with your audience\u2014whether you want to emphasize the service offering, your freelance positioning, or the responsive design specialty.\n\n**Meta Descriptions:** Your existing description is solid (mentions responsive websites and targets small businesses) but lacks your specific keywords \u0022web design services,\u0022 \u0022responsive website design,\u0022 and \u0022freelance web developer.\u0022 My suggestions integrate all three target phrases naturally while adding clear calls-to-action like \u0022Get a free quote,\u0022 \u0022Contact now,\u0022 and \u0022Start your project\u0022 to improve click-through rates.\n\n**H1 Tags:** The current H1 is user-friendly but not optimized for your target keywords. My suggestions incorporate your exact keyword phrases while maintaining readability. Since this is a portfolio page, I\u0027ve included \u0022Portfolio\u0022 in the H1 options to match user intent and page content.\n\n**Additional Note:** Your og:title currently matches your weak title tag (\u0022Web Design\u0022) and should be updated alongside it. The missing og:description should also be added to improve social media sharing.\n\nWould you like me to refine any of these, try different keywords, or analyse additional tags (e.g. og:title, canonical URL)?",
+    "suggestions": [
+      {
+        "tag": "title",
+        "currentValue": "Web Design",
+        "suggestedValue": "Web Design Services | Responsive Website Design"
+      },
+      {
+        "tag": "title",
+        "currentValue": "Web Design",
+        "suggestedValue": "Freelance Web Developer | Responsive Design Services"
+      },
+      {
+        "tag": "title",
+        "currentValue": "Web Design",
+        "suggestedValue": "Responsive Website Design Services | Expert Portfolio"
+      },
+      {
+        "tag": "meta description",
+        "currentValue": "Professional web design and development services for small businesses and startups needing modern, responsive websites.",
+        "suggestedValue": "Expert freelance web developer offering responsive website design services. View my portfolio of modern, mobile-friendly sites. Get a free quote today!"
+      },
+      {
+        "tag": "meta description",
+        "currentValue": "Professional web design and development services for small businesses and startups needing modern, responsive websites.",
+        "suggestedValue": "Professional web design services specializing in responsive website design. Browse projects from an experienced freelance web developer. Contact now!"
+      },
+      {
+        "tag": "meta description",
+        "currentValue": "Professional web design and development services for small businesses and startups needing modern, responsive websites.",
+        "suggestedValue": "Looking for responsive website design? Freelance web developer with proven web design services for businesses. Explore my portfolio and start your project!"
+      },
+      {
+        "tag": "h1",
+        "currentValue": "Custom Website Design for Small Businesses",
+        "suggestedValue": "Responsive Website Design Services Portfolio"
+      },
+      {
+        "tag": "h1",
+        "currentValue": "Custom Website Design for Small Businesses",
+        "suggestedValue": "Web Design Services by Freelance Web Developer"
+      },
+      {
+        "tag": "h1",
+        "currentValue": "Custom Website Design for Small Businesses",
+        "suggestedValue": "Freelance Web Developer: Responsive Website Design Portfolio"
+      }
+    ]
+  },
+  "score": {
+    "score": 82,
+    "reasoning": "The agent delivered all 9 required suggestions with correct tag names and strong keyword integration across all three target phrases. All suggestions comply with technical SEO character limits and read naturally with clear value propositions. However, three meta descriptions fall slightly short of the 150-160 character range (149, 151, 155 chars), and H1 option 3 is at the upper boundary of natural length at 60 characters. The suggestions show good differentiation in angles, though some meta description variations are relatively similar in structure and messaging.",
+    "strengths": [
+      "Excellent keyword integration: all 9 suggestions naturally incorporate the three target keywords (web design services, responsive website design, freelance web developer) in varied combinations",
+      "Strong SEO compliance: titles are 47-53 characters (within 50-60 range), H1 tags are natural and readable, and all suggestions maintain high-quality, non-spammy phrasing with clear CTAs",
+      "Good differentiation within each tag group: title options emphasize different angles (services-first, freelancer-first, responsive-first), and H1 options vary between portfolio-centric and service-centric approaches"
+    ],
+    "weaknesses": [
+      "Meta description character counts are slightly off: options 2 and 3 fall below the 150-160 target at 149 and 155 characters respectively, creating minor compliance issues",
+      "Limited semantic variety in meta descriptions: all three options follow similar structure (keyword phrase \u002B benefit \u002B CTA) making them feel somewhat repetitive in approach rather than offering distinct positioning angles"
+    ]
+  },
+  "ranAt": "2026-05-05T12:00:52.147557Z"
+}

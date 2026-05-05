@@ -43,7 +43,7 @@ builder.Services.AddSingleton<IAgentService>(sp =>
         sp.GetRequiredService<IHttpClientFactory>(),
         sp.GetRequiredService<ILogger<SeoAgentService>>(),
         anthropicApiKey,
-        useFakePage));
+        fakePageHtml: useFakePage ? SeoAgentService.FakePageHtml : null));
 
 // ── 5. MediatR ────────────────────────────────────────────────────────────────
 builder.Services.AddMediatR(cfg =>

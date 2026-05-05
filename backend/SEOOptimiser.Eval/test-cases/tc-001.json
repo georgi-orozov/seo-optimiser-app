@@ -1,0 +1,11 @@
+{
+  "id": "tc-001",
+  "description": "MISSING_TAGS scenario for a yoga studio with no meta description or og tags.",
+  "fakePageHtml": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022UTF-8\u0022\u003E\n  \u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022\u003E\n  \u003Ctitle\u003EYoga Classes\u003C/title\u003E\n  \u003Clink rel=\u0022canonical\u0022 href=\u0022https://example-eval.com/yoga-classes\u0022\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Ch1\u003EZen Flow Yoga Studio\u003C/h1\u003E\n  \u003Cp\u003EWelcome to our studio offering beginner and advanced yoga classes in downtown Seattle.\u003C/p\u003E\n  \u003Cp\u003EWe specialize in Vinyasa, Hatha, and Yin yoga styles with certified instructors.\u003C/p\u003E\n  \u003Cp\u003ECall us today to book your first class.\u003C/p\u003E\n\u003C/body\u003E\n\u003C/html\u003E",
+  "targetKeywords": [
+    "yoga classes Seattle",
+    "Vinyasa yoga",
+    "certified yoga instructor"
+  ],
+  "userMessage": "Please analyse https://example-eval.com/yoga-classes"
+}

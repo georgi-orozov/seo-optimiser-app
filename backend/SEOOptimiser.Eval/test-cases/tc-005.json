@@ -1,0 +1,11 @@
+{
+  "id": "tc-005",
+  "description": "LOCAL_BUSINESS scenario for a dental clinic with geo-specific SEO issues.",
+  "fakePageHtml": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022UTF-8\u0022\u003E\n  \u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022\u003E\n  \u003Ctitle\u003EBright Smile Dental Clinic\u003C/title\u003E\n  \u003Cmeta name=\u0022description\u0022 content=\u0022Dental office providing general and cosmetic dentistry services since 2010.\u0022\u003E\n  \u003Cmeta property=\u0022og:title\u0022 content=\u0022Bright Smile Dental\u0022\u003E\n  \u003Clink rel=\u0022canonical\u0022 href=\u0022https://example-eval.com/dental-clinic-portland\u0022\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Ch1\u003EBright Smile Dental Clinic\u003C/h1\u003E\n  \u003Cp\u003EWelcome to Bright Smile Dental, serving the Portland, Oregon community.\u003C/p\u003E\n  \u003Cp\u003EOur experienced dentists offer teeth whitening, implants, root canals, and routine cleanings.\u003C/p\u003E\n  \u003Cp\u003ELocated at 2401 SW Alder Street, Portland, OR 97205.\u003C/p\u003E\n  \u003Cp\u003EOpen Monday\u2013Friday 8am\u20136pm, Saturday 9am\u20132pm.\u003C/p\u003E\n  \u003Cp\u003ECall 503-555-0147 to book your appointment today.\u003C/p\u003E\n\u003C/body\u003E\n\u003C/html\u003E",
+  "targetKeywords": [
+    "dentist Portland OR",
+    "dental implants Portland",
+    "teeth whitening near me"
+  ],
+  "userMessage": "Please analyse https://example-eval.com/dental-clinic-portland"
+}

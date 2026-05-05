@@ -1,0 +1,11 @@
+{
+  "id": "tc-004",
+  "description": "ECOMMERCE scenario for a handmade leather goods store with product pricing and commercial intent.",
+  "fakePageHtml": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022UTF-8\u0022\u003E\n  \u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022\u003E\n  \u003Ctitle\u003EGenuine Leather Wallets, Bags, and Accessories | Craftsman Leather Co.\u003C/title\u003E\n  \u003Cmeta name=\u0022description\u0022 content=\u0022Handmade leather wallets, messenger bags, and belts. Premium quality, ethically sourced materials. Free shipping on orders over $50.\u0022\u003E\n  \u003Cmeta property=\u0022og:title\u0022 content=\u0022Genuine Leather Wallets and Bags\u0022\u003E\n  \u003Cmeta property=\u0022og:description\u0022 content=\u0022Handmade premium leather goods with free shipping.\u0022\u003E\n  \u003Clink rel=\u0022canonical\u0022 href=\u0022https://example-eval.com/leather-wallets\u0022\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Ch1\u003EHandmade Leather Wallets Starting at $45\u003C/h1\u003E\n  \u003Cp\u003EEach wallet is hand-stitched from full-grain leather by skilled artisans.\u003C/p\u003E\n  \u003Cp\u003EAvailable in black, brown, and tan. RFID-blocking technology included.\u003C/p\u003E\n  \u003Cp\u003EPrice: $45 - $85. Buy now with fast checkout.\u003C/p\u003E\n  \u003Cp\u003ESatisfaction guarantee or money back within 30 days.\u003C/p\u003E\n\u003C/body\u003E\n\u003C/html\u003E",
+  "targetKeywords": [
+    "handmade leather wallets",
+    "premium leather bags",
+    "artisan leather goods"
+  ],
+  "userMessage": "Please analyse https://example-eval.com/leather-wallets"
+}

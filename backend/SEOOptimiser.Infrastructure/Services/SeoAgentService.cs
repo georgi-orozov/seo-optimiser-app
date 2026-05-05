@@ -16,7 +16,7 @@ namespace SEOOptimiser.Infrastructure.Services;
 public sealed partial class SeoAgentService : IAgentService
 {
     // Intentionally weak SEO so the agent always has meaningful suggestions to make.
-    private const string FakePageHtml = """
+    public const string FakePageHtml = """
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -41,18 +41,18 @@ public sealed partial class SeoAgentService : IAgentService
 
     private readonly ChatClientAgent _agent;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly bool _useFakePage;
+    private readonly string? _fakePageHtml;
     private readonly ILogger<SeoAgentService> _logger;
 
     public SeoAgentService(
         IHttpClientFactory httpClientFactory,
         ILogger<SeoAgentService> logger,
         string anthropicApiKey,
-        bool useFakePage = false)
+        string? fakePageHtml = null)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _useFakePage = useFakePage;
+        _fakePageHtml = fakePageHtml;
 
         var fetchTool = AIFunctionFactory.Create(
             ([Description("The URL of the web page to fetch and analyse.")] string url) =>
@@ -122,10 +122,10 @@ public sealed partial class SeoAgentService : IAgentService
     {
         string html;
 
-        if (_useFakePage)
+        if (_fakePageHtml is not null)
         {
             LogFakePageWarning(url);
-            html = FakePageHtml;
+            html = _fakePageHtml;
         }
         else
         {

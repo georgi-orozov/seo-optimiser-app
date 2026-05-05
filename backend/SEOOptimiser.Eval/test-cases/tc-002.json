@@ -1,0 +1,11 @@
+{
+  "id": "tc-002",
+  "description": "KEYWORD_MISMATCH scenario for an organic skincare brand with misaligned title and description.",
+  "fakePageHtml": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022UTF-8\u0022\u003E\n  \u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022\u003E\n  \u003Ctitle\u003EBest Moisturizer Deals Online\u003C/title\u003E\n  \u003Cmeta name=\u0022description\u0022 content=\u0022Shop discounted beauty products and cosmetics online with fast shipping.\u0022\u003E\n  \u003Cmeta property=\u0022og:title\u0022 content=\u0022Best Moisturizer Deals Online\u0022\u003E\n  \u003Cmeta property=\u0022og:description\u0022 content=\u0022Shop discounted beauty products and cosmetics online.\u0022\u003E\n  \u003Clink rel=\u0022canonical\u0022 href=\u0022https://example-eval.com/organic-skincare\u0022\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Ch1\u003E100% Natural Organic Skincare Products\u003C/h1\u003E\n  \u003Cp\u003EOur cruelty-free, vegan skincare line uses certified organic ingredients.\u003C/p\u003E\n  \u003Cp\u003EDiscover anti-aging serums, natural moisturizers, and eco-friendly packaging.\u003C/p\u003E\n\u003C/body\u003E\n\u003C/html\u003E",
+  "targetKeywords": [
+    "organic skincare",
+    "natural anti-aging serum",
+    "cruelty-free beauty"
+  ],
+  "userMessage": "Please analyse https://example-eval.com/organic-skincare"
+}

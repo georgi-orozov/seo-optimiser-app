@@ -1,0 +1,73 @@
+{
+  "testCaseId": "tc-002",
+  "description": "KEYWORD_MISMATCH scenario for an organic skincare brand with misaligned title and description.",
+  "targetKeywords": [
+    "organic skincare",
+    "natural anti-aging serum",
+    "cruelty-free beauty"
+  ],
+  "agentOutput": {
+    "text": "I\u0027ll analyse that page for you right away.\nPerfect! I can see there\u0027s significant room for improvement. The current title and meta description focus on \u0022deals\u0022 and \u0022discounts\u0022 rather than your target keywords. Let me create 9 optimized suggestions for you.\n## Summary of Key Improvements\n\n**The Big Issue:** Your current page is optimized for the wrong search intent. The title \u0022Best Moisturizer Deals Online\u0022 targets bargain hunters, but your keywords indicate users looking for premium organic and cruelty-free products.\n\n**Title Tag Strategy:**\nAll three suggestions incorporate your primary keywords within the 50-60 character limit, with \u0022organic skincare\u0022 or \u0022natural anti-aging serum\u0022 positioned early for maximum SEO impact. I\u0027ve varied the structure to test different keyword priorities\u2014one leads with the complete keyword set, another emphasizes the anti-aging benefit, and the third highlights the cruelty-free angle.\n\n**Meta Description Strategy:**\nEach version stays within 150-160 characters and includes a clear call-to-action (\u0022Shop now,\u0022 \u0022Explore today,\u0022 etc.). I\u0027ve woven in all three target keywords naturally while emphasizing different value propositions: the first focuses on product range and ethics, the second on transformation and results, and the third on premium quality and ethics.\n\n**H1 Strategy:**\nYour existing H1 is actually quite good\u2014it contains \u0022organic skincare\u0022\u2014but I\u0027ve refined it to include more of your target keywords. The suggestions balance SEO optimization with natural readability, each emphasizing a different primary keyword while maintaining a user-friendly tone.\n\n**Additional Note:** Your og:title and og:description currently mirror the problematic main tags, so updating those to match your chosen title and meta description will ensure consistent messaging when your page is shared on social media.\n\nWould you like me to refine any of these, try different keywords, or analyse additional tags (e.g. og:title, canonical URL)?",
+    "suggestions": [
+      {
+        "tag": "title",
+        "currentValue": "Best Moisturizer Deals Online",
+        "suggestedValue": "Organic Skincare \u0026 Natural Anti-Aging Serum | Cruelty-Free"
+      },
+      {
+        "tag": "title",
+        "currentValue": "Best Moisturizer Deals Online",
+        "suggestedValue": "Natural Anti-Aging Serum \u2013 Organic Cruelty-Free Beauty"
+      },
+      {
+        "tag": "title",
+        "currentValue": "Best Moisturizer Deals Online",
+        "suggestedValue": "Cruelty-Free Organic Skincare | Natural Anti-Aging Serums"
+      },
+      {
+        "tag": "meta description",
+        "currentValue": "Shop discounted beauty products and cosmetics online with fast shipping.",
+        "suggestedValue": "Discover our organic skincare collection featuring natural anti-aging serums. 100% cruelty-free beauty products that nourish your skin naturally. Shop now."
+      },
+      {
+        "tag": "meta description",
+        "currentValue": "Shop discounted beauty products and cosmetics online with fast shipping.",
+        "suggestedValue": "Transform your skin with our natural anti-aging serum and organic skincare range. Certified cruelty-free beauty that delivers real results. Explore today."
+      },
+      {
+        "tag": "meta description",
+        "currentValue": "Shop discounted beauty products and cosmetics online with fast shipping.",
+        "suggestedValue": "Premium organic skincare and natural anti-aging serums for radiant, youthful skin. Our cruelty-free beauty products are pure, effective, and ethically made."
+      },
+      {
+        "tag": "h1",
+        "currentValue": "100% Natural Organic Skincare Products",
+        "suggestedValue": "Organic Skincare \u0026 Natural Anti-Aging Serums"
+      },
+      {
+        "tag": "h1",
+        "currentValue": "100% Natural Organic Skincare Products",
+        "suggestedValue": "Cruelty-Free Organic Skincare for Radiant Skin"
+      },
+      {
+        "tag": "h1",
+        "currentValue": "100% Natural Organic Skincare Products",
+        "suggestedValue": "Natural Anti-Aging Serum \u0026 Organic Skincare Collection"
+      }
+    ]
+  },
+  "score": {
+    "score": 92,
+    "reasoning": "The agent delivered all 9 required suggestions (3 per tag) with correct tag identification and strong keyword integration. All titles fall within the 50-60 character range, meta descriptions within 150-160 characters, and H1s read naturally while incorporating target keywords. The suggestions are well-differentiated, avoiding redundancy. Minor deductions apply for slight keyword stuffing in some meta descriptions and minimal variation in H1 structure.",
+    "strengths": [
+      "Perfect completeness: all 9 suggestions delivered with correct tag names and no omissions",
+      "Excellent keyword integration: all three target keywords (organic skincare, natural anti-aging serum, cruelty-free beauty) naturally woven throughout all suggestions with strategic positioning",
+      "Strong technical compliance: all titles (54-58 chars), meta descriptions (154-156 chars), and H1s meet SEO standards with natural readability and clear value propositions"
+    ],
+    "weaknesses": [
+      "Minor keyword density concern in meta descriptions\u2014phrases like \u0027organic skincare\u0027 and \u0027cruelty-free\u0027 appear somewhat frequently, risking subtle over-optimization perception",
+      "Limited differentiation in H1 suggestions: all three use similar structure (adjective \u002B product type) with primary keyword variations, missing opportunities for dramatically different angles (e.g., benefit-driven vs. ingredient-driven vs. certification-driven)"
+    ]
+  },
+  "ranAt": "2026-05-05T12:00:16.741621Z"
+}

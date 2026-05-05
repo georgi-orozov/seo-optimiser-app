@@ -1,0 +1,11 @@
+{
+  "id": "tc-003",
+  "description": "TOO_SHORT scenario for a freelance web design portfolio with title under 30 characters.",
+  "fakePageHtml": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022UTF-8\u0022\u003E\n  \u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022\u003E\n  \u003Ctitle\u003EWeb Design\u003C/title\u003E\n  \u003Cmeta name=\u0022description\u0022 content=\u0022Professional web design and development services for small businesses and startups needing modern, responsive websites.\u0022\u003E\n  \u003Cmeta property=\u0022og:title\u0022 content=\u0022Web Design\u0022\u003E\n  \u003Clink rel=\u0022canonical\u0022 href=\u0022https://example-eval.com/web-design-portfolio\u0022\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Ch1\u003ECustom Website Design for Small Businesses\u003C/h1\u003E\n  \u003Cp\u003EI create beautiful, mobile-responsive websites that convert visitors into customers.\u003C/p\u003E\n  \u003Cp\u003ESpecializing in WordPress, React, and e-commerce solutions.\u003C/p\u003E\n  \u003Cp\u003ELet\u0027s build your online presence today.\u003C/p\u003E\n\u003C/body\u003E\n\u003C/html\u003E",
+  "targetKeywords": [
+    "web design services",
+    "responsive website design",
+    "freelance web developer"
+  ],
+  "userMessage": "Please analyse https://example-eval.com/web-design-portfolio"
+}
