@@ -30,6 +30,7 @@ public partial class SendMessageCommandHandler(
 
         var session = await db.ChatSessions
             .Include(s => s.Messages.OrderBy(m => m.CreatedAt))
+                .ThenInclude(m => m.Suggestions)
             .FirstOrDefaultAsync(
                 s => s.Id == request.SessionId && s.UserId == request.UserId,
                 cancellationToken)
