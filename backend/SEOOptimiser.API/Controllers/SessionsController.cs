@@ -1,6 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SEOOptimiser.API.Extensions;
 using SEOOptimiser.Core.UseCases.Messages.Commands;
 using SEOOptimiser.Core.UseCases.Sessions.Commands;
@@ -110,16 +113,19 @@ public partial class SessionsController(IMediator mediator, ILogger<SessionsCont
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The assistant's reply message including its ID and timestamp.</returns>
     [HttpPost("{id:guid}/messages")]
+    [EnableRateLimiting("SendMessage")]
     [ProducesResponseType(typeof(SendMessageResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> SendMessage(
         Guid id,
         [FromBody] SendMessageRequest req,
         CancellationToken ct)
     {
         LogSendMessage(logger, id, User.GetUserId());
-        var result = await mediator.Send(new SendMessageCommand(id, User.GetUserId(), req.Content), ct);
+        var result = await mediator.Send(new SendMessageCommand(id, User.GetUserId(), req.SanitizedContent), ct);
         return Ok(result);
     }
 
@@ -138,8 +144,19 @@ public partial class SessionsController(IMediator mediator, ILogger<SessionsCont
 
 /// <summary>Request body for creating a new session.</summary>
 /// <param name="Title">Optional display title. Defaults to "New Session" if omitted.</param>
-public record CreateSessionRequest(string? Title);
+public record CreateSessionRequest(
+    [MaxLength(200, ErrorMessage = "Session title must not exceed 200 characters.")]
+    string? Title);
 
 /// <summary>Request body for sending a message to the agent.</summary>
 /// <param name="Content">The user's message text. Can be a URL, keywords, or any free-form instruction.</param>
-public record SendMessageRequest(string Content);
+public record SendMessageRequest(
+    [Required]
+    [MinLength(1, ErrorMessage = "Message must not be empty.")]
+    [MaxLength(4000, ErrorMessage = "Message must not exceed 4000 characters.")]
+    string Content)
+{
+    // Strips null bytes and C0 control chars; preserves tab (0x09), LF (0x0A), CR (0x0D)
+    public string SanitizedContent =>
+        Regex.Replace(Content, @"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", string.Empty);
+}

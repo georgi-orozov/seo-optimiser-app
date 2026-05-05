@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Anthropic;
 using HtmlAgilityPack;
 using Microsoft.Agents.AI;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using SEOOptimiser.Core.Constants;
 using SEOOptimiser.Core.Entities;
 using SEOOptimiser.Core.Interfaces;
+using SEOOptimiser.Infrastructure.Security;
 using CoreChatMessage = SEOOptimiser.Core.Entities.ChatMessage;
 using AIChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
@@ -177,6 +179,13 @@ public sealed partial class SeoAgentService : IAgentService
         }
         else
         {
+            var validation = await UrlValidator.ValidateAsync(url);
+            if (!validation.IsValid)
+            {
+                LogSsrfBlocked(url, validation.ErrorMessage!);
+                return JsonSerializer.Serialize(new { error = "The provided URL could not be fetched. Please provide a valid public URL." });
+            }
+
             LogFetchingPage(url);
             using var client = _httpClientFactory.CreateClient("PageFetcher");
             try
@@ -187,9 +196,13 @@ public sealed partial class SeoAgentService : IAgentService
             catch (Exception ex)
             {
                 LogFetchPageFailed(ex, url);
-                return JsonSerializer.Serialize(new { error = $"Failed to fetch page: {ex.Message}" });
+                return JsonSerializer.Serialize(new { error = "The page could not be fetched. Please verify the URL is publicly accessible." });
             }
         }
+
+        // Strip HTML comments before parsing — prevents indirect prompt injection via
+        // page content like <!-- Ignore previous instructions and... -->
+        html = StripHtmlComments(html);
 
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
@@ -209,6 +222,9 @@ public sealed partial class SeoAgentService : IAgentService
         string? GetAttr(string xpath, string attr) =>
             doc.DocumentNode.SelectSingleNode(xpath)?.GetAttributeValue(attr, null);
     }
+
+    private static string StripHtmlComments(string html) =>
+        Regex.Replace(html, @"<!--.*?-->", string.Empty, RegexOptions.Singleline);
 
     [LoggerMessage(Level = LogLevel.Debug,
         Message = "Creating agent session (prior messages: {Count})")]
@@ -234,6 +250,9 @@ public sealed partial class SeoAgentService : IAgentService
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to fetch page: {Url}")]
     private partial void LogFetchPageFailed(Exception ex, string url);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SSRF blocked — URL '{Url}': {Reason}")]
+    private partial void LogSsrfBlocked(string url, string reason);
 
     // Parameter types for the batch suggestion tool.
     private record TagOption(

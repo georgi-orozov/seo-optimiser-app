@@ -1,5 +1,7 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SEOOptimiser.API.Authentication;
@@ -139,6 +141,55 @@ builder.Services.AddCors(opts =>
               .AllowAnyHeader()
               .AllowAnyMethod()));
 
+// ── 9. Rate limiting ──────────────────────────────────────────────────────────
+builder.Services.AddRateLimiter(opts =>
+{
+    opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Global: 100 requests/min per IP across all endpoints
+    opts.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
+    {
+        var ip = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 100,
+            Window      = TimeSpan.FromMinutes(1),
+            QueueLimit  = 0,
+        });
+    });
+
+    // Named: 30 messages/min per authenticated user (applied via [EnableRateLimiting] on the action)
+    opts.AddPolicy("SendMessage", ctx =>
+    {
+        var userId = ctx.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                     ?? ctx.Connection.RemoteIpAddress?.ToString()
+                     ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(userId, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 30,
+            Window      = TimeSpan.FromMinutes(1),
+            QueueLimit  = 0,
+        });
+    });
+
+    opts.OnRejected = async (ctx, ct) =>
+    {
+        if (ctx.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+            ctx.HttpContext.Response.Headers.RetryAfter =
+                ((int)retryAfter.TotalSeconds).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        ctx.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await ctx.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            status = 429,
+            title  = "Too Many Requests",
+            detail = "Rate limit exceeded. Please wait before sending another request."
+        }, ct);
+    };
+});
+
+// ── 10. Request body size limit ───────────────────────────────────────────────
+builder.WebHost.ConfigureKestrel(opts => opts.Limits.MaxRequestBodySize = 32 * 1024); // 32 KB
+
 var app = builder.Build();
 
 // ── 9. Auto-migrate database on startup ───────────────────────────────────────
@@ -148,20 +199,25 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
-// ── 10. Middleware pipeline ───────────────────────────────────────────────────
+// ── 11. Middleware pipeline ───────────────────────────────────────────────────
 app.UseSwagger();
 app.UseSwaggerUI(opts =>
 {
     opts.SwaggerEndpoint("/swagger/v1/swagger.json", "SEO Optimiser API v1");
     opts.RoutePrefix = "swagger";
     opts.DisplayRequestDuration();
-    opts.DefaultModelsExpandDepth(-1); // collapse schema section by default
+    opts.DefaultModelsExpandDepth(-1);
 });
+
+app.UseSecurityHeaders();
+if (app.Environment.IsProduction())
+    app.UseHsts();
 
 app.UseExceptionHandler();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 
 app.Run();
