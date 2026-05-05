@@ -7,67 +7,67 @@
     "certified yoga instructor"
   ],
   "agentOutput": {
-    "text": "I\u0027ll analyze that page for you with those target keywords in mind. Let me fetch the current SEO tags first.\nNow I\u0027ll create 3 optimized suggestions for each tag based on your target keywords: \u0022yoga classes Seattle,\u0022 \u0022Vinyasa yoga,\u0022 and \u0022certified yoga instructor.\u0022\n## Analysis Summary\n\nYour page currently has significant SEO gaps that are preventing it from ranking for your target keywords. Here\u0027s what I found and why my suggestions will help:\n\n**Title Tag Issues:**\nYour current title \u0022Yoga Classes\u0022 is extremely generic and only 12 characters\u2014far too short to compete in search. It completely misses all three of your target keywords. My suggestions front-load \u0022Yoga Classes Seattle\u0022 or \u0022Vinyasa Yoga Classes\u0022 to immediately signal geographic and practice-style relevance, while staying within the optimal 50-60 character range. The first option includes your studio name for brand recognition, while the second and third options emphasize certified instructors as a trust signal.\n\n**Meta Description\u2014Currently Missing:**\nYou have no meta description at all, which means Google will auto-generate one from your page content. This is a huge missed opportunity. My three suggestions all stay within 150-160 characters and include clear calls to action (\u0022Book today,\u0022 \u0022Start your journey,\u0022 \u0022Try your first class free\u0022). Each weaves in all three keyword themes naturally while highlighting differentiators like \u0022all levels welcome\u0022 and \u0022welcoming community\u0022 to improve click-through rates.\n\n**H1 Optimization:**\nYour current H1 is \u0022Zen Flow Yoga Studio,\u0022 which is fine for branding but doesn\u0027t target any search keywords. The H1 should tell both users and search engines what the page is about. My first two suggestions directly incorporate all three keyword themes in natural, readable ways. The third option leads with emotional benefit while still including the primary keyword phrase, which can appeal to users at the awareness stage of their search journey.\n\n**Key Improvements:**\n- Geographic targeting now present (Seattle)\n- Primary style specified (Vinyasa)\n- Trust signals added (certified instructors)\n- Better character length utilization\n- Clear user intent matching for local yoga class searches\n\nWould you like me to refine any of these, try different keywords, or analyse additional tags (e.g. og:title, canonical URL)?",
+    "text": "The current title is only 13 characters and lacks any keywords. There\u0027s no meta description at all, which is a critical missed opportunity for organic search. The H1 \u0022Zen Flow Yoga Studio\u0022 contains \u0022yoga\u0022 but omits all target keywords (location, style, instructor credentials). Additionally, og:title and og:description are absent\u2014these should be addressed after the core tags.\nYour 9 suggestions are ready above. Would you like to refine any option, try a different keyword angle, or audit additional tags such as og:title or og:description?",
     "suggestions": [
       {
         "tag": "title",
         "currentValue": "Yoga Classes",
-        "suggestedValue": "Yoga Classes Seattle | Vinyasa Yoga | Zen Flow Studio"
+        "suggestedValue": "Yoga Classes Seattle: Vinyasa \u0026 More | Zen Flow"
       },
       {
         "tag": "title",
         "currentValue": "Yoga Classes",
-        "suggestedValue": "Vinyasa Yoga Classes in Seattle | Certified Instructors"
+        "suggestedValue": "Vinyasa Yoga Classes in Seattle | Zen Flow Studio"
       },
       {
         "tag": "title",
         "currentValue": "Yoga Classes",
-        "suggestedValue": "Seattle Yoga Classes with Certified Vinyasa Instructors"
+        "suggestedValue": "Seattle Yoga Classes with Certified Instructors | Zen Flow"
       },
       {
         "tag": "meta description",
         "currentValue": null,
-        "suggestedValue": "Join our Vinyasa yoga classes in Seattle led by certified instructors. All levels welcome at Zen Flow. Book your first class today and flow with us!"
+        "suggestedValue": "Join yoga classes in Seattle led by certified instructors. Explore Vinyasa yoga, beginner flows, and advanced sessions at Zen Flow Studio. Book your spot today."
       },
       {
         "tag": "meta description",
         "currentValue": null,
-        "suggestedValue": "Discover Seattle\u0027s premier yoga classes at Zen Flow Studio. Our certified Vinyasa yoga instructors guide beginners to advanced students. Start your journey now!"
+        "suggestedValue": "Discover Vinyasa yoga classes in Seattle at Zen Flow Studio. Our certified yoga instructors guide you through every practice level. Start your journey now."
       },
       {
         "tag": "meta description",
         "currentValue": null,
-        "suggestedValue": "Experience transformative Vinyasa yoga classes in Seattle with our certified instructors. Flexible schedules, welcoming community. Try your first class free!"
+        "suggestedValue": "Experience yoga classes in Seattle with certified instructors specializing in Vinyasa yoga. Flexible schedules and welcoming atmosphere at Zen Flow. Try a class free."
       },
       {
         "tag": "h1",
         "currentValue": "Zen Flow Yoga Studio",
-        "suggestedValue": "Vinyasa Yoga Classes in Seattle with Certified Instructors"
+        "suggestedValue": "Yoga Classes in Seattle: Vinyasa, Hatha \u0026 Restorative"
       },
       {
         "tag": "h1",
         "currentValue": "Zen Flow Yoga Studio",
-        "suggestedValue": "Seattle Yoga Classes Led by Certified Vinyasa Instructors"
+        "suggestedValue": "Experience Vinyasa Yoga with Certified Instructors in Seattle"
       },
       {
         "tag": "h1",
         "currentValue": "Zen Flow Yoga Studio",
-        "suggestedValue": "Transform Your Practice: Yoga Classes in Seattle"
+        "suggestedValue": "Seattle\u0027s Premier Yoga Classes Taught by Certified Yoga Instructors"
       }
     ]
   },
   "score": {
-    "score": 92,
-    "reasoning": "The agent delivered all 9 required suggestions with correct tag names and strong keyword integration across titles, meta descriptions, and H1s. Technical compliance is excellent\u2014all titles fall within 50-60 characters, meta descriptions are 148-160 characters, and H1s naturally incorporate target keywords. The suggestions are well-written, compelling, and avoid keyword stuffing. Minor deductions apply for slight variation in meta description character counts and marginal differentiation in some H1 options.",
+    "score": 82,
+    "reasoning": "The agent provided all 9 required suggestions with correct tag names and strong keyword integration across all options. All suggestions comply with technical SEO rules and read naturally with clear value propositions. The main weakness is limited differentiation between some meta description options, which follow very similar structures despite targeting the same keywords.",
     "strengths": [
-      "All 9 suggestions delivered with correct tag names and strong natural integration of all three target keywords (yoga classes Seattle, Vinyasa yoga, certified yoga instructor)",
-      "Excellent technical SEO compliance: titles 53-55 chars, meta descriptions 148-160 chars, all H1s read naturally with primary keyword inclusion",
-      "High-quality, non-spammy copy with clear CTAs, trust signals (certified instructors, all levels welcome), and distinct value propositions that would likely improve click-through rates"
+      "Perfect completeness: all 9 suggestions delivered with correct HTML tag identification (3 titles, 3 meta descriptions, 3 H1s)",
+      "Excellent keyword integration: all suggestions naturally incorporate target keywords (yoga classes Seattle, Vinyasa yoga, certified yoga instructor) without stuffing",
+      "Strong SEO compliance: all titles under 100 chars (47-58), meta descriptions in 155-166 char range, H1s under 70 chars and contain primary keyword"
     ],
     "weaknesses": [
-      "Meta description Option 1 falls slightly short at 148 characters (below the 150-160 target range), though still acceptable",
-      "H1 options 1 and 2 are very similar in structure and keyword placement\u2014could offer more differentiation (e.g., one emphasizing beginner-friendliness, another advanced practice)"
+      "Differentiation gap: meta description options 1-3 follow nearly identical structure (keyword \u002B studio name \u002B CTA), limiting strategic variety despite good quality",
+      "Meta description option 3 exceeds recommended max at 166 characters (slightly high but borderline acceptable)"
     ]
   },
-  "ranAt": "2026-05-05T11:59:45.106199Z"
+  "ranAt": "2026-05-05T15:06:15.171263Z"
 }

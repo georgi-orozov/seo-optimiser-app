@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Text;
 using System.Text.Json;
 using Anthropic;
 using HtmlAgilityPack;
@@ -34,8 +35,7 @@ public sealed partial class SeoAgentService : IAgentService
         </body>
         </html>
         """;
-
-    // Per-async-flow capture of suggestions recorded by the agent via the record_seo_suggestion tool.
+    
     // AsyncLocal ensures concurrent requests don't interfere with each other.
     private static readonly AsyncLocal<List<SuggestionCapture>?> _currentSuggestions = new();
 
@@ -61,15 +61,32 @@ public sealed partial class SeoAgentService : IAgentService
             description: "Fetches a web page at the given URL and extracts key SEO tags: title, meta description, h1, og:title, og:description, and canonical URL.");
 
         var suggestTool = AIFunctionFactory.Create(
-            ([Description("The HTML tag being suggested, e.g. 'title', 'meta description', 'h1'.")] string tag,
-             [Description("The page's existing value for this tag. Omit if the tag is absent.")] string? currentValue,
-             [Description("Your recommended replacement value.")] string suggestedValue) =>
+            ([Description("Exactly 3 title tag alternatives (50-60 chars each).")] TagOption[] title,
+             [Description("Exactly 3 meta description alternatives (150-160 chars each).")] TagOption[] metaDescription,
+             [Description("Exactly 3 H1 tag alternatives (contains primary keyword, reads naturally).")] TagOption[] h1) =>
+            {
+                foreach (var s in title)
+                    _currentSuggestions.Value?.Add(new SuggestionCapture("title", s.CurrentValue, s.SuggestedValue));
+                foreach (var s in metaDescription)
+                    _currentSuggestions.Value?.Add(new SuggestionCapture("meta description", s.CurrentValue, s.SuggestedValue));
+                foreach (var s in h1)
+                    _currentSuggestions.Value?.Add(new SuggestionCapture("h1", s.CurrentValue, s.SuggestedValue));
+                return Task.FromResult("All 9 suggestions recorded.");
+            },
+            name: "record_seo_suggestions",
+            description: "Record all SEO suggestions at once — call exactly once per response with 3 options each for title, meta description, and h1.");
+
+        var updateTool = AIFunctionFactory.Create(
+            ([Description("The tag being updated: 'title', 'meta description', or 'h1'.")] string tag,
+             [Description("The page's existing value. Null if the tag is absent.")] string? currentValue,
+             [Description("The updated replacement value.")] string suggestedValue) =>
             {
                 _currentSuggestions.Value?.Add(new SuggestionCapture(tag, currentValue, suggestedValue));
-                return Task.FromResult("Suggestion recorded.");
+                return Task.FromResult("Suggestion updated.");
             },
-            name: "record_seo_suggestion",
-            description: "Record one SEO suggestion. Call once per tag per suggestion round.");
+            name: "update_seo_suggestion",
+            description: "Record one refined SEO suggestion when the user asks to change a specific option. " +
+                         "Use this — NOT record_seo_suggestions — for refinements. Call once per changed option.");
 
         var anthropicClient = new AnthropicClient { ApiKey = anthropicApiKey };
 
@@ -77,7 +94,7 @@ public sealed partial class SeoAgentService : IAgentService
             model: "claude-sonnet-4-5",
             instructions: AgentSystemPrompt.Text,
             name: "SeoAgent",
-            tools: [fetchTool, suggestTool]);
+            tools: [fetchTool, suggestTool, updateTool]);
     }
 
     public async Task<AgentRunResult> RunAsync(
@@ -95,9 +112,15 @@ public sealed partial class SeoAgentService : IAgentService
             if (priorMessages.Count > 0)
             {
                 var history = priorMessages
-                    .Select(m => new AIChatMessage(
-                        m.Role == MessageRole.User ? ChatRole.User : ChatRole.Assistant,
-                        m.Content))
+                    .Select(m =>
+                    {
+                        var content = m.Content;
+                        if (m.Role == MessageRole.Assistant && m.Suggestions.Count > 0)
+                            content += FormatSuggestionsForHistory(m.Suggestions);
+                        return new AIChatMessage(
+                            m.Role == MessageRole.User ? ChatRole.User : ChatRole.Assistant,
+                            content);
+                    })
                     .ToList();
 
                 agentSession.SetInMemoryChatHistory(history);
@@ -116,6 +139,31 @@ public sealed partial class SeoAgentService : IAgentService
         {
             _currentSuggestions.Value = null;
         }
+    }
+
+    private static string FormatSuggestionsForHistory(IReadOnlyCollection<Suggestion> suggestions)
+    {
+        var sb = new StringBuilder("\n\n[Suggestions provided in this response:");
+        foreach (var tag in new[] { "title", "meta description", "h1" })
+        {
+            var group = suggestions
+                .Where(s => s.Tag.Equals(tag, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (group.Count == 0) continue;
+            sb.AppendLine();
+            sb.Append($"  {tag.ToUpperInvariant()}:");
+            for (var i = 0; i < group.Count; i++)
+            {
+                var current = group[i].CurrentValue is not null
+                    ? $" (was: \"{group[i].CurrentValue}\")"
+                    : string.Empty;
+                sb.AppendLine();
+                sb.Append($"    Option {i + 1}: \"{group[i].SuggestedValue}\"{current}");
+            }
+        }
+        sb.AppendLine();
+        sb.Append(']');
+        return sb.ToString();
     }
 
     private async Task<string> FetchPageAsync(string url)
@@ -186,4 +234,9 @@ public sealed partial class SeoAgentService : IAgentService
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to fetch page: {Url}")]
     private partial void LogFetchPageFailed(Exception ex, string url);
+
+    // Parameter types for the batch suggestion tool.
+    private record TagOption(
+        [property: Description("The page's existing value. Null if the tag is absent.")] string? CurrentValue,
+        [property: Description("The recommended replacement value.")] string SuggestedValue);
 }

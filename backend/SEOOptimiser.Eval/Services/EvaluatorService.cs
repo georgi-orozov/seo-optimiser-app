@@ -25,7 +25,7 @@ public sealed class EvaluatorService
 
         3. SEO Compliance [25pts]
            Do suggestions follow technical SEO rules?
-           - Titles: 50-60 characters
+           - Titles: Hard max 100 characters
            - Meta descriptions: 150-160 characters
            - H1: contains primary keyword, reads naturally
            Deduct 3pts per suggestion that violates a rule (max 9pts deducted per dimension).
