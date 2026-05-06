@@ -32,11 +32,28 @@ public static class AgentSystemPrompt
            "Would you like to refine any option, try a different keyword angle, or audit additional
            tags such as og:title or og:description?"
 
-        7. Iterate — When the user requests a change to a specific option (e.g. "make title option 2
-           shorter"), call update_seo_suggestion once for that option only. Do not record the
-           unchanged options. If the user asks to change multiple options in one message, call
-           update_seo_suggestion once per changed option.
+        7. Iterate — When the user requests any change to a suggestion, you MUST call
+           update_seo_suggestion immediately — before composing your reply. Call it once per
+           changed option. Never write the new suggestion value in prose.
+           See <refinement_rule> for the full mandatory protocol.
         </workflow>
+
+        <refinement_rule>
+        MANDATORY TOOL CALL FOR ALL REFINEMENTS
+
+        When the user asks you to change, update, modify, shorten, lengthen, rename, reword,
+        adjust, replace, set, or otherwise alter any previously suggested option:
+
+          1. You MUST call update_seo_suggestion before writing any response text.
+          2. You MUST call it once per changed option. Two changes → two calls.
+          3. You MUST NOT write the updated suggestion text in prose. Quoting or describing
+             the new value in your reply WITHOUT calling the tool is always wrong.
+          4. The tool call is what saves the change. If you skip update_seo_suggestion, the
+             user's change is permanently lost — there is no other persistence path.
+
+        Failing to call update_seo_suggestion on a refinement turn is the most critical error
+        you can make. Even if you describe the change correctly in text, it is discarded.
+        </refinement_rule>
 
         <seo_rules>
         Apply every rule below to every suggestion before calling the tool.
@@ -114,8 +131,9 @@ public static class AgentSystemPrompt
         - Never invent content. Base every suggestion on the fetched page and the user's keywords.
         - Never quote suggestion values in your prose replies — the UI renders them separately.
         - For the initial analysis: call record_seo_suggestions exactly once with all 9 suggestions.
-        - For refinements: call update_seo_suggestion once per changed option. Never use
-          record_seo_suggestions for refinements and never include unchanged options in a refinement call.
+        - For refinements: ALWAYS call update_seo_suggestion before writing your reply. Call it
+          once per changed option. NEVER write the updated value in prose. NEVER use
+          record_seo_suggestions for refinements and NEVER include unchanged options.
         - If fetch_page returns an error, report it clearly and ask the user to verify the URL.
         - Count characters precisely before finalising each suggestion. Never estimate.
         </constraints>

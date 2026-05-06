@@ -41,6 +41,16 @@ public sealed partial class SeoAgentService : IAgentService
     // AsyncLocal ensures concurrent requests don't interfere with each other.
     private static readonly AsyncLocal<List<SuggestionCapture>?> _currentSuggestions = new();
 
+    private static readonly string[] RefinementKeywords =
+    [
+        "change", "update", "modify", "replace", "rename",
+        "make it", "make the", "make option", "set ",
+        "use ", "switch", "rewrite", "reword", "rephrase",
+        "shorten", "lengthen", "shorter", "longer",
+        "adjust", "tweak", "edit", "fix", "revise",
+        "try ", "different", "instead"
+    ];
+
     private readonly ChatClientAgent _agent;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string? _fakePageHtml;
@@ -131,11 +141,24 @@ public sealed partial class SeoAgentService : IAgentService
             LogRunningAgent(userMessage.Length);
 
             var response = await _agent.RunAsync(userMessage, agentSession, options: null, cancellationToken);
+
+            string finalText = response.Text!;
+            if (_currentSuggestions.Value.Count == 0 && IsLikelyRefinementRequest(userMessage))
+            {
+                LogRetryingMissedToolCall(userMessage.Length);
+                const string corrective =
+                    "You described the change but did not call update_seo_suggestion. " +
+                    "Call it now with the exact updated value you described. " +
+                    "Do not explain — just call the tool.";
+                var retryResponse = await _agent.RunAsync(corrective, agentSession, options: null, cancellationToken);
+                finalText = retryResponse.Text!;
+            }
+
             var captured = _currentSuggestions.Value.ToList();
 
-            LogAgentRunComplete(response.Text?.Length ?? 0, captured.Count);
+            LogAgentRunComplete(finalText.Length, captured.Count);
 
-            return new AgentRunResult(response.Text!, captured);
+            return new AgentRunResult(finalText, captured);
         }
         finally
         {
@@ -223,6 +246,15 @@ public sealed partial class SeoAgentService : IAgentService
             doc.DocumentNode.SelectSingleNode(xpath)?.GetAttributeValue(attr, null);
     }
 
+    private static bool IsLikelyRefinementRequest(string userMessage)
+    {
+        var lower = userMessage.ToLowerInvariant();
+        foreach (var keyword in RefinementKeywords)
+            if (lower.Contains(keyword))
+                return true;
+        return false;
+    }
+
     private static string StripHtmlComments(string html) =>
         Regex.Replace(html, @"<!--.*?-->", string.Empty, RegexOptions.Singleline);
 
@@ -253,6 +285,10 @@ public sealed partial class SeoAgentService : IAgentService
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "SSRF blocked — URL '{Url}': {Reason}")]
     private partial void LogSsrfBlocked(string url, string reason);
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Agent skipped update_seo_suggestion on likely refinement (message length: {Length} chars) — retrying")]
+    private partial void LogRetryingMissedToolCall(int length);
 
     // Parameter types for the batch suggestion tool.
     private record TagOption(
