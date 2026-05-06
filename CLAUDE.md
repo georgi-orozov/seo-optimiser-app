@@ -15,15 +15,19 @@ The backend is complete. The frontend is not yet started.
 
 ```
 seo-optimiser-app/
+├── docker-compose.yml                     # Root-level compose — runs all three services
+├── .env.example                           # Copy to .env and fill in secrets
 ├── backend/
 │   ├── SEOOptimiser.slnx                  # .NET 10 uses .slnx (not .sln)
-│   ├── docker-compose.yml
-│   ├── .env                               # gitignored — copy from .env.example
+│   ├── docker-compose.yml                 # Local dotnet run workflow (postgres only)
+│   ├── .env                               # gitignored — copy from backend/.env.example
 │   ├── .env.example
 │   ├── SEOOptimiser.API/                  # HTTP layer: controllers, Program.cs, Dockerfile
 │   ├── SEOOptimiser.Core/                 # Domain: entities, interfaces, CQRS use cases, DTOs
 │   └── SEOOptimiser.Infrastructure/       # EF Core, migrations, SeoAgentService
-└── frontend/                              # React + Vite + TypeScript + Mantine + Clerk (not started)
+└── frontend/                              # React + Vite + TypeScript + Mantine + Clerk
+    ├── Dockerfile                         # Multi-stage: Node 22 build → Nginx serve
+    └── nginx.conf                         # SPA routing config
 ```
 
 ## Backend
@@ -40,7 +44,24 @@ seo-optimiser-app/
 - **API docs**: Swashbuckle (`/swagger`)
 - **Migrations**: EF Core code-first (`SEOOptimiser.Infrastructure`)
 
-### Setup — Backend
+### Setup — Full Stack (Docker Compose)
+
+```bash
+# From the repo root
+
+# 1. Copy and fill in secrets
+cp .env.example .env
+# Edit .env: POSTGRES_PASSWORD, ANTHROPIC_API_KEY, CLERK_AUTHORITY, VITE_CLERK_PUBLISHABLE_KEY
+
+# 2. Start all three services
+docker compose up --build
+```
+
+- Frontend: `http://localhost:3000`
+- API / Swagger: `http://localhost:8080/swagger`
+- Postgres: `localhost:5432`
+
+### Setup — Backend (local dotnet run)
 
 ```bash
 cd backend
@@ -57,12 +78,9 @@ docker compose up postgres -d
 
 # 4. Run the API locally
 dotnet run --project SEOOptimiser.API
-
-# OR run everything in Docker
-docker compose up --build
 ```
 
-- Swagger UI: `http://localhost:5273/swagger` (dotnet run, HTTP) or `https://localhost:7271/swagger` (dotnet run, HTTPS) or `http://localhost:8080/swagger` (Docker)
+- Swagger UI: `http://localhost:5273/swagger` (dotnet run, HTTP) or `https://localhost:7271/swagger` (dotnet run, HTTPS)
 - Auto-migration runs on every startup — no manual `dotnet ef database update` needed in normal use
 
 ### Commands
