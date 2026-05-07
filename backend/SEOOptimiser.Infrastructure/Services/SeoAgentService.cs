@@ -79,12 +79,19 @@ public sealed partial class SeoAgentService : IAgentService
              [Description("Exactly 3 meta description alternatives (150-160 chars each).")] TagOption[] metaDescription,
              [Description("Exactly 3 H1 tag alternatives (contains primary keyword, reads naturally).")] TagOption[] h1) =>
             {
+                using var activity = SeoTelemetry.Source.StartActivity("seo-agent.tool.record-suggestions", ActivityKind.Internal);
+                activity?.SetTag("suggestions.title.count", title.Length);
+                activity?.SetTag("suggestions.meta.count", metaDescription.Length);
+                activity?.SetTag("suggestions.h1.count", h1.Length);
+
                 foreach (var s in title)
                     _currentSuggestions.Value?.Add(new SuggestionCapture("title", s.CurrentValue, s.SuggestedValue));
                 foreach (var s in metaDescription)
                     _currentSuggestions.Value?.Add(new SuggestionCapture("meta description", s.CurrentValue, s.SuggestedValue));
                 foreach (var s in h1)
                     _currentSuggestions.Value?.Add(new SuggestionCapture("h1", s.CurrentValue, s.SuggestedValue));
+
+                activity?.SetStatus(ActivityStatusCode.Ok);
                 return Task.FromResult("All 9 suggestions recorded.");
             },
             name: "record_seo_suggestions",
@@ -95,7 +102,14 @@ public sealed partial class SeoAgentService : IAgentService
              [Description("The page's existing value. Null if the tag is absent.")] string? currentValue,
              [Description("The updated replacement value.")] string suggestedValue) =>
             {
+                using var activity = SeoTelemetry.Source.StartActivity("seo-agent.tool.update-suggestion", ActivityKind.Internal);
+                activity?.SetTag("suggestion.tag", tag);
+                activity?.SetTag("suggestion.current-value", currentValue);
+                activity?.SetTag("suggestion.suggested-value", suggestedValue);
+
                 _currentSuggestions.Value?.Add(new SuggestionCapture(tag, currentValue, suggestedValue));
+
+                activity?.SetStatus(ActivityStatusCode.Ok);
                 return Task.FromResult("Suggestion updated.");
             },
             name: "update_seo_suggestion",
@@ -210,7 +224,7 @@ public sealed partial class SeoAgentService : IAgentService
 
     private async Task<string> FetchPageAsync(string url)
     {
-        using var fetchActivity = SeoTelemetry.Source.StartActivity("seo-agent.fetch-page", ActivityKind.Client);
+        using var fetchActivity = SeoTelemetry.Source.StartActivity("seo-agent.tool.fetch-page", ActivityKind.Client);
         fetchActivity?.SetTag("url", url);
 
         string html;

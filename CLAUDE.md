@@ -128,7 +128,9 @@ The dashboard shows traces, correlated log records, and metrics in a single UI.
 | `mediator.<Name>` | Every MediatR command/query (`TelemetryBehavior`) | `mediator.request` |
 | `seo-agent.run` | `SeoAgentService.RunAsync` | `prior.message.count`, `suggestions.captured` |
 | `seo-agent.retry` | Missed-tool-call retry block | `retry.reason` |
-| `seo-agent.fetch-page` | `FetchPageAsync` | `url`, `fetch.source`, `fetch.response.bytes`, `fetch.blocked` |
+| `seo-agent.tool.fetch-page` | `fetch_page` tool → `FetchPageAsync` | `url`, `fetch.source`, `fetch.response.bytes`, `fetch.blocked` |
+| `seo-agent.tool.record-suggestions` | `record_seo_suggestions` tool lambda | `suggestions.title.count`, `suggestions.meta.count`, `suggestions.h1.count` |
+| `seo-agent.tool.update-suggestion` | `update_seo_suggestion` tool lambda | `suggestion.tag`, `suggestion.current-value`, `suggestion.suggested-value` |
 
 #### Using observability with local `dotnet run`
 
