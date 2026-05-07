@@ -3,4 +3,7 @@
   <Project Path="SEOOptimiser.Core/SEOOptimiser.Core.csproj" />
   <Project Path="SEOOptimiser.Infrastructure/SEOOptimiser.Infrastructure.csproj" />
   <Project Path="SEOOptimiser.Eval/SEOOptimiser.Eval.csproj" />
+  <Project Path="SEOOptimiser.Core.Tests/SEOOptimiser.Core.Tests.csproj" />
+  <Project Path="SEOOptimiser.API.Tests/SEOOptimiser.API.Tests.csproj" />
+  <Project Path="SEOOptimiser.Infrastructure.Tests/SEOOptimiser.Infrastructure.Tests.csproj" />
 </Solution>

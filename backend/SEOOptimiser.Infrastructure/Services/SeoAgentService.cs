@@ -246,7 +246,7 @@ public sealed partial class SeoAgentService : IAgentService
             doc.DocumentNode.SelectSingleNode(xpath)?.GetAttributeValue(attr, null);
     }
 
-    private static bool IsLikelyRefinementRequest(string userMessage)
+    internal static bool IsLikelyRefinementRequest(string userMessage)
     {
         var lower = userMessage.ToLowerInvariant();
         foreach (var keyword in RefinementKeywords)
@@ -255,7 +255,7 @@ public sealed partial class SeoAgentService : IAgentService
         return false;
     }
 
-    private static string StripHtmlComments(string html) =>
+    internal static string StripHtmlComments(string html) =>
         Regex.Replace(html, @"<!--.*?-->", string.Empty, RegexOptions.Singleline);
 
     [LoggerMessage(Level = LogLevel.Debug,
