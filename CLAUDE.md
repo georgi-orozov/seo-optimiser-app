@@ -109,6 +109,40 @@ dotnet ef database update -p SEOOptimiser.Infrastructure -s SEOOptimiser.API
 
 All endpoints require a Clerk JWT Bearer token (unless auth bypass is enabled — see below).
 
+### Observability
+
+The backend exports OpenTelemetry traces, structured logs, and metrics via OTLP to the .NET Aspire Dashboard, which starts automatically with `docker compose up`.
+
+- **Browser UI**: http://localhost:18888 (no login required in local dev)
+- **OTLP receiver** (internal Docker network): `http://aspire-dashboard:18889`
+- **OTLP receiver** (host, for `dotnet run`): `http://localhost:18889`
+
+The dashboard shows traces, correlated log records, and metrics in a single UI.
+
+#### Manual spans in `SeoAgentService`
+
+`Microsoft.Agents.AI.Anthropic` 1.3.0-preview has no built-in OTel support, so spans are added manually via `System.Diagnostics.ActivitySource`. The source is defined in `SEOOptimiser.Infrastructure/Telemetry/SeoTelemetry.cs`:
+
+| Span name | Where | Key tags |
+|-----------|-------|----------|
+| `mediator.<Name>` | Every MediatR command/query (`TelemetryBehavior`) | `mediator.request` |
+| `seo-agent.run` | `SeoAgentService.RunAsync` | `prior.message.count`, `suggestions.captured` |
+| `seo-agent.retry` | Missed-tool-call retry block | `retry.reason` |
+| `seo-agent.fetch-page` | `FetchPageAsync` | `url`, `fetch.source`, `fetch.response.bytes`, `fetch.blocked` |
+
+#### Using observability with local `dotnet run`
+
+```bash
+# 1. Start only the dashboard container
+docker compose up aspire-dashboard -d
+
+# 2. Add to backend/SEOOptimiser.API/appsettings.Development.json (gitignored):
+#    "OpenTelemetry": { "OtlpEndpoint": "http://localhost:18889" }
+
+# 3. Run the API
+dotnet run --project SEOOptimiser.API
+```
+
 ### Auth Bypass (Development Only)
 
 Set `Auth:Bypass = true` in `appsettings.Development.json` (already the default there) to skip JWT
@@ -175,6 +209,8 @@ changes must be made there.
 - Ask before adding new NuGet or npm packages not already in the project
 - Run `dotnet build SEOOptimiser.slnx` after any backend change to catch errors early
 - Run `npm run build` after any frontend change to catch type errors early
+- When adding new infrastructure services that call external APIs or do significant async work, add a manual `SeoTelemetry.Source.StartActivity(...)` span following the pattern in `SeoAgentService`
+- Never add sensitive data (API keys, message content) as span tags — lengths and counts are fine, raw content is not
 
 ## What Claude Should Never Do
 

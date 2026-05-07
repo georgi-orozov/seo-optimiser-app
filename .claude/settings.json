@@ -29,7 +29,8 @@
       "Bash(npm create *)",
       "Bash(npm install *)",
       "Bash(npm run *)",
-      "Bash(grep -E \"\\\\.cs$|^d\")"
+      "Bash(grep -E \"\\\\.cs$|^d\")",
+      "Bash(dotnet list *)"
     ]
   }
 }

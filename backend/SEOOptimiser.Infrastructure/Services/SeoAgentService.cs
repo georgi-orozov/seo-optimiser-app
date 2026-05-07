@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -11,6 +12,7 @@ using SEOOptimiser.Core.Constants;
 using SEOOptimiser.Core.Entities;
 using SEOOptimiser.Core.Interfaces;
 using SEOOptimiser.Infrastructure.Security;
+using SEOOptimiser.Infrastructure.Telemetry;
 using CoreChatMessage = SEOOptimiser.Core.Entities.ChatMessage;
 using AIChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
@@ -114,6 +116,9 @@ public sealed partial class SeoAgentService : IAgentService
         string userMessage,
         CancellationToken cancellationToken = default)
     {
+        using var runActivity = SeoTelemetry.Source.StartActivity("seo-agent.run", ActivityKind.Internal);
+        runActivity?.SetTag("prior.message.count", priorMessages.Count);
+
         _currentSuggestions.Value = [];
         try
         {
@@ -145,6 +150,9 @@ public sealed partial class SeoAgentService : IAgentService
             string finalText = response.Text!;
             if (_currentSuggestions.Value.Count == 0 && IsLikelyRefinementRequest(userMessage))
             {
+                using var retryActivity = SeoTelemetry.Source.StartActivity("seo-agent.retry", ActivityKind.Internal);
+                retryActivity?.SetTag("retry.reason", "missed-tool-call");
+
                 LogRetryingMissedToolCall(userMessage.Length);
                 const string corrective =
                     "You described the change but did not call update_seo_suggestion. " +
@@ -156,9 +164,18 @@ public sealed partial class SeoAgentService : IAgentService
 
             var captured = _currentSuggestions.Value.ToList();
 
+            runActivity?.SetTag("suggestions.captured", captured.Count);
+            runActivity?.SetStatus(ActivityStatusCode.Ok);
+
             LogAgentRunComplete(finalText.Length, captured.Count);
 
             return new AgentRunResult(finalText, captured);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            runActivity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            runActivity?.AddException(ex);
+            throw;
         }
         finally
         {
@@ -193,11 +210,15 @@ public sealed partial class SeoAgentService : IAgentService
 
     private async Task<string> FetchPageAsync(string url)
     {
+        using var fetchActivity = SeoTelemetry.Source.StartActivity("seo-agent.fetch-page", ActivityKind.Client);
+        fetchActivity?.SetTag("url", url);
+
         string html;
 
         if (_fakePageHtml is not null)
         {
             LogFakePageWarning(url);
+            fetchActivity?.SetTag("fetch.source", "fake");
             html = _fakePageHtml;
         }
         else
@@ -206,19 +227,26 @@ public sealed partial class SeoAgentService : IAgentService
             if (!validation.IsValid)
             {
                 LogSsrfBlocked(url, validation.ErrorMessage!);
+                fetchActivity?.SetStatus(ActivityStatusCode.Error, "SSRF blocked");
+                fetchActivity?.SetTag("fetch.blocked", "true");
                 return JsonSerializer.Serialize(new { error = "The provided URL could not be fetched. Please provide a valid public URL." });
             }
 
             LogFetchingPage(url);
+            fetchActivity?.SetTag("fetch.source", "http");
             using var client = _httpClientFactory.CreateClient("PageFetcher");
             try
             {
                 html = await client.GetStringAsync(url);
                 LogFetchedPage(url, html.Length);
+                fetchActivity?.SetTag("fetch.response.bytes", html.Length);
+                fetchActivity?.SetStatus(ActivityStatusCode.Ok);
             }
             catch (Exception ex)
             {
                 LogFetchPageFailed(ex, url);
+                fetchActivity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                fetchActivity?.AddException(ex);
                 return JsonSerializer.Serialize(new { error = "The page could not be fetched. Please verify the URL is publicly accessible." });
             }
         }

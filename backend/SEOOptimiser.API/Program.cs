@@ -4,12 +4,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using SEOOptimiser.API.Authentication;
 using SEOOptimiser.API.Middleware;
+using SEOOptimiser.API.Pipeline;
 using SEOOptimiser.Core.Interfaces;
 using SEOOptimiser.Core.UseCases.Sessions.Commands;
 using SEOOptimiser.Infrastructure.Persistence;
 using SEOOptimiser.Infrastructure.Services;
+using SEOOptimiser.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,7 +55,10 @@ builder.Services.AddSingleton<IAgentService>(sp =>
 
 // ── 5. MediatR ────────────────────────────────────────────────────────────────
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(CreateSessionCommand).Assembly));
+{
+    cfg.RegisterServicesFromAssembly(typeof(CreateSessionCommand).Assembly);
+    cfg.AddOpenBehavior(typeof(TelemetryBehavior<,>));
+});
 
 // ── 6. Authentication ─────────────────────────────────────────────────────────
 if (authBypass)
@@ -187,7 +196,44 @@ builder.Services.AddRateLimiter(opts =>
     };
 });
 
-// ── 10. Request body size limit ───────────────────────────────────────────────
+// ── 10. OpenTelemetry ─────────────────────────────────────────────────────────
+var otlpEndpoint = builder.Configuration["OpenTelemetry:OtlpEndpoint"];
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService("SEOOptimiser.API"))
+    .WithTracing(tracing => tracing
+        .AddSource(SeoTelemetry.SourceName)
+        .AddAspNetCoreInstrumentation(opts =>
+            opts.Filter = ctx => !ctx.Request.Path.StartsWithSegments("/swagger"))
+        .AddHttpClientInstrumentation(opts =>
+            opts.FilterHttpRequestMessage = req =>
+                req.RequestUri?.Host.Contains("api.anthropic.com") != true)
+        .AddEntityFrameworkCoreInstrumentation(opts =>
+            opts.SetDbStatementForText = true)
+        .AddOtlpExporter(opts =>
+        {
+            if (!string.IsNullOrEmpty(otlpEndpoint))
+                opts.Endpoint = new Uri(otlpEndpoint);
+        }))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(opts =>
+        {
+            if (!string.IsNullOrEmpty(otlpEndpoint))
+                opts.Endpoint = new Uri(otlpEndpoint);
+        }));
+
+if (!string.IsNullOrEmpty(otlpEndpoint))
+{
+    builder.Logging.AddOpenTelemetry(logging =>
+    {
+        logging.IncludeScopes = true;
+        logging.AddOtlpExporter(opts => opts.Endpoint = new Uri(otlpEndpoint));
+    });
+}
+
+// ── 11. Request body size limit ───────────────────────────────────────────────
 builder.WebHost.ConfigureKestrel(opts => opts.Limits.MaxRequestBodySize = 32 * 1024); // 32 KB
 
 var app = builder.Build();
